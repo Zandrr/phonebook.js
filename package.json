@@ -1,0 +1,27 @@
+{
+    "name": "phonebook",
+    "version": "0.25",
+    "description": "A TLS-secured relational database of file hashes, users, and onion locations",
+    "main": "phonebook.js",
+    "repository": "",
+    "keywords": [
+        "phonebook",
+        "tls",
+        "relational",
+        "database"
+    ],
+    "dependencies" : [
+        "tls",
+        "orm",
+        "json-buffer",
+        "sqlite3"
+    ],
+    "author": {
+        "name": "Kelly Kaoudis",
+        "email": "kaoudis@colorado.edu"
+    },
+    "contributors": [],
+    "license": "GPL",
+    "readmeFilename": "README.md",
+    "scripts": { }
+}

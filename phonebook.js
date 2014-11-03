@@ -1,0 +1,127 @@
+//a UDP server that stores information about encrypted files and encrypted info about their origin/destination
+//last updated November 2014
+//kaoudis@colorado.edu
+
+var orm = require('orm');
+var fs = require('fs');
+var jb = require('json-buffer');
+var tls = require('tls');
+
+orm.connect("sqlite://username:password@hostname?debug=false&strdates=true/phonebook", function(err, db){
+    if (err) throw err; // FIXME return over tls connection?
+
+    /* our model for associating the hash of a file with its source, destination, and randomly chosen rendezvous location */
+    var Record = db.define("record", {
+        source_id: {type: "text", required: "true"},
+        dest_id: {type: "text", required: "true", defaultValue: null},
+        file_size: {type: "number", required: "true"},
+        file_location: {type: "text"}, //.onion address, added in second step
+        sha512hash: {type: "text", required: "true"},
+        ttl: {type: "integer", required: "true"},
+        timestamp: {type: "date", time: true},
+
+        {
+            methods: {
+                isInfinite: function() {if (this.ttl == Number.POSITIVE_INFINITY) return true; else return false;},
+
+                /* only for debug purposes */
+                getFullRecord: function(requestedHash, requestedSource, requestedDest, requestedLoc) {
+                        if (requestedHash != this.sha512hash) {
+                            return {error: 'ReportIncorrectHash', sha512hash: requestedHash, dest_id: requestedDest};
+                        }
+
+                        if (requestedDest != this.dest_id) {
+                            return {error: 'ReportIncorrectDestination', sha512hash: requestedHash, dest_id: requestedDest};
+                        }
+
+                        if (this.source_id != requestedSource) {
+                            return {error: 'ReportIncorrectSource', sha512hash: requestedHash, source_id: requestedSource};
+                        }
+
+                        if ((this.ttl > 0) && (this.ttl != Number.POSITIVE_INFINITY)) {
+                            this.ttl = this.ttl - 1;
+                            this.ttl.save();
+                        }
+
+                        if (this.ttl <= 0) {
+                            if (this.sha512hash) this.remove();
+
+                            return {error: 'ReportExpiredTTL', sha512hash: requestedHash, dest_id: requestedDest};
+                        }
+
+                        return {sha512hash: this.sha512hash, dest_id: this.dest_id, loc: this.file_location, size: this.file_size, ttl: this.ttl};
+                },
+
+                /* only for debug purposes */
+                hasLocation: function(requestedHash, requestedSource, requestedDest, requestedLoc) {
+                    if (this.sha512hash == requestedHash) {
+                        if (this.file_location != requestedLoc) {
+                            return {error: 'ReportIncorrectLocation', sha512hash: requestedHash, file_location: requestedLoc};
+                        }
+
+                       if (this.dest_id != requestedDest) {
+                            return {error: 'ReportIncorrectDestination', sha512hash: requestedHash, dest_id: requestedDest};
+                       }
+
+                       return {sha512hash: requestedHash, source_id: requestedSource, dest_id: requestedDest, loc: requestedLoc};
+                    }
+
+                    return {error: 'ReportIncorrectHash', sha512hash: requestedHash, dest_id: requestedDest};
+            },
+
+            /* once a random rendezvous point is acquired from the list, associate it to our record */
+            assignLocation: function(requestedHash, requestedSource, requestedDest, newLocation) {
+                if (this.sha512hash == requestedHash) {
+                    if (this.file_location) {
+                        return {error: 'ReportLocationAlreadyAssigned', sha512hash: requestedHash, source_id: requestedSource, dest_id: requestedDest};
+                    }
+
+                    if (this.dest_id != requestedDest) {
+                         return {error: 'ReportIncorrectDestination', sha512hash: requestedHash, dest_id: requestedDest};
+                    }
+
+                    if (this.source_id != requestedSource) {
+                        return {error: 'ReportIncorrectSource', sha512hash: requestedHash, source_id: requestedSource};
+                    }
+
+                    this.file_location = newLocation;
+                    this.file_location.save();
+
+                    return {sha512hash: requestedHash, source_id: requestedSource, dest_id: requestedDest, file_location: newLocation};
+                }
+
+                return {error: 'ReportIncorrectHash', sha512hash: requestedHash, dest_id: requestedDest};
+            },
+
+            validations : {
+                ttl: orm.enforce.ranges(1, Number.POSITIVE_INFINITY, 'ReportExpiredTTL'),
+//                file_size: orm.enforce.ranges(1, MAX_FILE_SIZE, 'ReportOverlargeFile'),
+                sha512hash: orm.enforce.unique({scope: ['sha512hash']}, 'ReportHashCollision')
+            }
+        }
+    });
+
+    Record.findByHash({hash: requestedHash}, function(err, items){
+
+
+    });
+
+    Record.findBySource({source_id: requestedSource}, function(err, items){
+
+
+    });
+
+    Record.findByDest({dest_id: requestedFrom}, function(err, items){
+
+
+    });
+
+});
+
+/* allow searching by source */
+
+/* allow searching by destination */
+
+/* allow searching by full SHA 512 hash for now (later we'll possibly add a choice of hash functions)  */
+
+
