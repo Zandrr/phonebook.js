@@ -1,6 +1,6 @@
 {
     "name": "phonebook",
-    "version": "0.25",
+    "version": "0.05",
     "description": "A TLS-secured relational database of file hashes, users, and onion locations",
     "main": "phonebook.js",
     "repository": "",
@@ -21,7 +21,7 @@
         "email": "kaoudis@colorado.edu"
     },
     "contributors": [],
-    "license": "GPL",
+    "license": "MIT",
     "readmeFilename": "README.md",
     "scripts": { }
 }
