@@ -7,29 +7,37 @@
 //last updated November 2014
 //kaoudis@colorado.edu
 
-var orm = require('orm');
+var orm = require('orm'); //modifying this later is likely
 var fs = require('fs');
 var jb = require('json-buffer');
 var tls = require('tls');
 
 orm.connect("sqlite://username:password@hostname?debug=false&strdates=true/phonebook", function(err, db){
-    if (err) throw err; // FIXME return over tls connection?
+    if (err) throw err; // return over tls connection?
 
-    /* our model for associating the hash of a file with its source, destination, and randomly chosen rendezvous location */
+    /* initial model for associating the hash of a file with its source, destination, and rendezvous location */
     var Record = db.define("record", {
-        source_id: {type: "text", required: "true"},
-        dest_id: {type: "text", required: "true", defaultValue: null},
-        file_size: {type: "number", required: "true"},
-        file_location: {type: "text"}, //.onion address, added in second step
-        sha512hash: {type: "text", required: "true"},
-        ttl: {type: "integer", required: "true"},
+        source_id: {type: "text", required: true, unique: true},
+        dest_id: {type: "text", required: true, defaultValue: null},
+        file_size: {type: "number", required: true},
+        file_location: {type: "text"}, //.onion address, added once the file is requested
+        sha512hash: {type: "text", required: true, unique: true},
+        ttl: {type: "integer", required: true},
         timestamp: {type: "date", time: true},
 
         {
             methods: {
+            //possible errors:
+            //    ReportIncorrectHash: the hash did not match any of the hashes available from source requestedSource for dest requestedDest
+            //    ReportIncorrectDestination: requestedDest did not match any possible destination listed by requestedSource
+            //    ReportIncorrectSource: the hash and the destination exist, but the file is not available from source requestedSource
+            //    ReportExpiredTTL: the TTL has been decremented to zero by previous download(s) of the file and thus has expired
+            //    ReportIncorrectLocation: internally, the phonebook can't put file x in location y for some reason. Might take this out.
+            //    ReportHashCollision: this should hopefully be quite rare
+
                 isInfinite: function() {if (this.ttl == Number.POSITIVE_INFINITY) return true; else return false;},
 
-                /* only for debug purposes */
+                /* debug purposes */
                 getFullRecord: function(requestedHash, requestedSource, requestedDest, requestedLoc) {
                         if (requestedHash != this.sha512hash) {
                             return {error: 'ReportIncorrectHash', sha512hash: requestedHash, dest_id: requestedDest};
@@ -57,7 +65,7 @@ orm.connect("sqlite://username:password@hostname?debug=false&strdates=true/phone
                         return {sha512hash: this.sha512hash, dest_id: this.dest_id, loc: this.file_location, size: this.file_size, ttl: this.ttl};
                 },
 
-                /* only for debug purposes */
+                /* debug purposes */
                 hasLocation: function(requestedHash, requestedSource, requestedDest, requestedLoc) {
                     if (this.sha512hash == requestedHash) {
                         if (this.file_location != requestedLoc) {
