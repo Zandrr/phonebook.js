@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/kaoudis/phonebook.js.png?label=ready&title=Ready)](https://waffle.io/kaoudis/phonebook.js)
 phonebook.js
 ============
 
