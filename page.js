@@ -15,9 +15,25 @@ var tls = require('tls');
 orm.connect("sqlite://username:password@hostname?debug=false&strdates=true/phonebook", function(err, db){
     if (err) throw err; // return over tls connection?
 
+    var User = db.define("user", {
+        id: {type: "text", required: true, mapsTo: "source_id"},
+//        uploads: {type: "object", values: {}, required: true},
+//        downloads: {type: "object", values: {}, required: true},
+        source: {type: "boolean", defaultValue: false},
+
+        {
+            methods: {},
+            validations: {}
+        }
+    });
+
+    /* relations between one User and their list of uploads/downloads. Each file (up/down) is represented by one Record */
+    User.hasMany("uploads", Record, {reverse: "user", autoFetch: true, mergeTable: "uploads"});
+    User.hasMany("downloads", Record, {reverse: "user", autoFetch: true, mergeTable: "downloads"});
+
     /* initial model for associating the hash of a file with its source, destination, and rendezvous location */
     var Record = db.define("record", {
-        source_id: {type: "text", required: true, unique: true},
+        source_id: {type: "text", required: true, unique: true, mapsTo: "id"},
         dest_id: {type: "text", required: true, defaultValue: null},
         file_size: {type: "number", required: true},
         file_location: {type: "text"}, //.onion address, added once the file is requested
@@ -108,7 +124,6 @@ orm.connect("sqlite://username:password@hostname?debug=false&strdates=true/phone
 
             validations : {
                 ttl: orm.enforce.ranges(1, Number.POSITIVE_INFINITY, 'ReportExpiredTTL'),
-//                file_size: orm.enforce.ranges(1, MAX_FILE_SIZE, 'ReportOverlargeFile'),
                 sha512hash: orm.enforce.unique({scope: ['sha512hash']}, 'ReportHashCollision')
             }
         }
