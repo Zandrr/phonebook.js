@@ -2,22 +2,45 @@ var orm = require('orm');
 
 module.exports = function(db, callback) {
     var User = db.define("user", {
-        id: {type: "text", required: true, mapsTo: "source_id"},
-//        uploads: {type: "object", values: {}, required: true},
-//        downloads: {type: "object", values: {}, required: true},
-       source: {type: "boolean", defaultValue: false},
+        user_id: {type: "text", required: true, mapsTo: "source_id"},
+        uploads: {type: "object", values: {}, required: true},
+        downloads: {type: "object", values: {}, required: true},
+        source: {type: "boolean", defaultValue: false},
 
-       {
+        {
             methods: {
+                userAlreadyExists: function(requestedUserId) {
+                    if this.exists({id: 1}) return true;
+                    else return false;
+                },
+
+                isSource: function() {
+                    if (this.source == true) return true;
+                    else return false;
+                },
+
+                hasActiveUploads: function() {
+                    if (this.isSource() && (Object.keys(this.uploads).length >= 1) ) return true;
+                    else return false;
+                },
+
+                hasActiveDownloads: function() {
+                    if ((!this.isSource()) && (Object.keys(this.downloads).length >= 1)) return true;
+                    else return false;
+                },
 
              },
-            validations: {}
-        }
+
+            validations: {
+                user_id: orm.enforce.unique({scope: ['user_id']}, 'ReportIdentifierCollision')
+
+            }
+       }
     });
 
 /* associating the hash of a file with its source, destination, and (eventual) rendezvous location */
     var Record = db.define("record", {
-        source_id: {type: "text", required: true, unique: true, mapsTo: "id"},
+        source_id: {type: "text", required: true, unique: true, mapsTo: "user_id"},
         dest_id: {type: "text", required: true, defaultValue: null},
         file_size: {type: "number", required: true},
         file_location: {type: "text"}, //.onion address, added once the file is requested
