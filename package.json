@@ -17,13 +17,12 @@
         "sqlite3",
         "crypto-js"
     ],
-    "contributors": [{
-        name: "Kelly Kaoudis",
-        email: "kaoudis@colorado.edu"
-    }, {
-        name: "Alex Campbell",
-        email: "alexander.campbell@colorado.edu"
-    }],
+    "contributors": [
+        {name: "Kelly Kaoudis",
+        email: "kaoudis@colorado.edu"}, 
+        {name: "Alex Campbell",
+        email: "alexander.campbell@colorado.edu"}
+    ],
     "license": "MIT",
     "readmeFilename": "README.md",
     "scripts": { }
