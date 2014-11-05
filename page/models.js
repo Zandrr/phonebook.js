@@ -31,7 +31,7 @@ module.exports = function(db, callback) {
                 user_id: orm.enforce.unique({scope: ['user_id']}, 'ReportIdentifierCollision')
 
             }
-       );
+        });
 
 /* associating the hash of a file with its source, destination, and (eventual) rendezvous location */
     var Record = db.define("record", {
