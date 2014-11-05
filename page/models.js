@@ -2,12 +2,13 @@ var orm = require('orm');
 
 module.exports = function(db, callback) {
     var User = db.define("user", {
-        user_id: {type: "text", required: true, mapsTo: "source_id"},
-        uploads: {type: "object", values: {}, required: true},
-        downloads: {type: "object", values: {}, required: true},
-        source: {type: "boolean", defaultValue: false},
-
-        {
+            user_id: {type: "text", required: true, mapsTo: "source_id"},
+            uploads: {type: "object", values: {}, required: true},
+            downloads: {type: "object", values: {}, required: true},
+            source: {type: "boolean", defaultValue: false},
+        }, {
+            autoSave: true,
+            autoFetch: true,
             methods: {
                 isSource: function() {
                     if (this.source == true) return true;
@@ -30,20 +31,20 @@ module.exports = function(db, callback) {
                 user_id: orm.enforce.unique({scope: ['user_id']}, 'ReportIdentifierCollision')
 
             }
-       }
-    });
+       );
 
 /* associating the hash of a file with its source, destination, and (eventual) rendezvous location */
     var Record = db.define("record", {
-        source_id: {type: "text", required: true, unique: true, mapsTo: "user_id"},
-        dest_id: {type: "text", required: true, defaultValue: null},
-        file_size: {type: "number", required: true},
-        file_location: {type: "text"}, //.onion address, added once the file is requested
-        sha512hash: {type: "text", required: true, unique: true},
-        ttl: {type: "integer", required: true},
-        timestamp: {type: "date", time: true},
-
-        {
+            source_id: {type: "text", required: true, unique: true, mapsTo: "user_id"},
+            dest_id: {type: "text", required: true, defaultValue: null},
+            file_size: {type: "number", required: true},
+            file_location: {type: "text"}, //.onion address, added once the file is requested
+            sha512hash: {type: "text", required: true, unique: true},
+            ttl: {type: "integer", required: true},
+            timestamp: {type: "date", time: true},
+        }, {
+            autoSave: true,
+            autoFetch: true,
             methods: {
            //possible errors:
             //    ReportIncorrectHash: the hash did not match any of the hashes available from source requestedSource for dest requestedDest
@@ -99,30 +100,6 @@ module.exports = function(db, callback) {
 
                     return {error: 'ReportIncorrectHash', sha512hash: requestedHash, dest_id: requestedDest};
             },
-
-        /* once a random rendezvous point is acquired from the list, associate it to our record
-        assignLocation: function(requestedHash, requestedSource, requestedDest, newLocation) {
-                if (this.sha512hash == requestedHash) {
-                    if (this.file_location) {
-                        return {error: 'ReportLocationAlreadyAssigned', sha512hash: requestedHash, source_id: requestedSource, dest_id: requestedDest};
-                    }
-
-                    if (this.dest_id != requestedDest) {
-                         return {error: 'ReportIncorrectDestination', sha512hash: requestedHash, dest_id: requestedDest};
-                    }
-
-                    if (this.source_id != requestedSource) {
-                        return {error: 'ReportIncorrectSource', sha512hash: requestedHash, source_id: requestedSource};
-                    }
-
-                    this.file_location = newLocation;
-                    this.file_location.save();
-
-                    return {sha512hash: requestedHash, source_id: requestedSource, dest_id: requestedDest, file_location: newLocation};
-                }
-
-                return {error: 'ReportIncorrectHash', sha512hash: requestedHash, dest_id: requestedDest};
-             }, */
 
         validations : {
                 ttl: orm.enforce.ranges(1, Number.POSITIVE_INFINITY, 'ReportExpiredTTL'),
