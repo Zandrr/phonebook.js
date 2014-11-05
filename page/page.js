@@ -23,7 +23,28 @@ orm.connect("sqlite://username:password@hostname?debug=false&strdates=true/phone
     User.hasMany("uploads", Record, {reverse: "user", autoFetch: true, mergeTable: "uploads"});
     User.hasMany("downloads", Record, {reverse: "user", autoFetch: true, mergeTable: "downloads"});
 
-    /* general methods ? */
+    /* some functions for working with User items */
+    User.userAlreadyExists: function(requestedUserId) {
+        if exists({id: 1, user_id: requestedUserId}) return true;
+        else return false;
+    };
+
+    User.addUser: function(requestedUserId, source) {
+        if !User.userAlreadyExists(requestedUserId) {
+            var newUser = {};
+            newUser.user_id = requestedUserId;
+            newUser.source = source;
+            User.create(newUser, function(err, results) {
+                if (err) return err;
+
+                return {}; //network statistics
+            });
+        }
+
+        else return {error: 'ReportUserExists', user_id: requestedUserId, source: source};
+
+    }
+
 });
 
 

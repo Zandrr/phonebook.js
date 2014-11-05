@@ -9,11 +9,6 @@ module.exports = function(db, callback) {
 
         {
             methods: {
-                userAlreadyExists: function(requestedUserId) {
-                    if this.exists({id: 1}) return true;
-                    else return false;
-                },
-
                 isSource: function() {
                     if (this.source == true) return true;
                     else return false;
@@ -105,7 +100,7 @@ module.exports = function(db, callback) {
                     return {error: 'ReportIncorrectHash', sha512hash: requestedHash, dest_id: requestedDest};
             },
 
-        /* once a random rendezvous point is acquired from the list, associate it to our record */
+        /* once a random rendezvous point is acquired from the list, associate it to our record
         assignLocation: function(requestedHash, requestedSource, requestedDest, newLocation) {
                 if (this.sha512hash == requestedHash) {
                     if (this.file_location) {
@@ -127,7 +122,7 @@ module.exports = function(db, callback) {
                 }
 
                 return {error: 'ReportIncorrectHash', sha512hash: requestedHash, dest_id: requestedDest};
-            },
+             }, */
 
         validations : {
                 ttl: orm.enforce.ranges(1, Number.POSITIVE_INFINITY, 'ReportExpiredTTL'),
