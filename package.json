@@ -1,27 +1,26 @@
 {
     "name": "phonebook",
-    "version": "0.05",
+    "repository":"https://github.com/kaoudis/phonebook.js",
     "description": "A secure, distributed relational database of file hashes, users, and onion locations",
     "main": "phonebook.js",
     "repository": "",
     "keywords": [
         "phonebook",
         "tls",
+        "encrypted",
         "relational",
         "database"
     ],
     "dependencies" : [
-        "tls",
+        "openpgp",
         "orm",
         "json-buffer",
         "sqlite3",
         "crypto-js"
     ],
     "contributors": [
-        {name: "Kelly Kaoudis",
-        email: "kaoudis@colorado.edu"}, 
-        {name: "Alex Campbell",
-        email: "alexander.campbell@colorado.edu"}
+        "Kelly Kaoudis kaoudis@colorado.edu",
+        "Alex Campbell alexander.campbell@colorado.edu"
     ],
     "license": "MIT",
     "readmeFilename": "README.md",
