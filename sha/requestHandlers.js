@@ -41,24 +41,26 @@ function upload(response, request){
             fs.rename(files.upload.path, "./tmp/test.txt");
         }
 
-    if (!fields.destination) {
-        console.log("Destination field was null. Encrypting with no set destination.");
-    }
+        if (!fields.destination) {
+            console.log("Destination field was null. Encrypting with no set destination.");
+        }
 
-    var userhash = "";
+        var keypair = null;
 
-    if (fields.username) {
-        //if a username (a client's public key acts as their unique identifier)
-        //and keyword are given: create hash based on the public key for user identification.
-        //note that the keyword (password) should not be transmitted onward, nor should the username!!
-        userhash = crypto.SHA3(fields.username);
-    }else {
-        //user doesn't have a key pair yet, so create a new one.
-        var keypair = pgp.generateKeyPair({numBits: 4096, userId: 'user', passphrase: fields.keyword});
-        var username = keypair.publicKeyArmored;
+        if (fields.username) {
+            fields.userhash = crypto.SHA3(fields.username);
+            keypair = pgp.key.readArmored(fields.username);
+        }else {
+            //user doesn't have a key pair yet, so create a new one.
+            keypair = pgp.generateKeyPair({numBits: 4096, userId: 'user', passphrase: fields.keyword});
+            var username = keypair.publicKeyArmored;
 
-        userhash = crypto.SHA3(username);
-        fields.username = username;
+            fields.username = username;
+            fields.userhash = crypto.SHA3(username);
+            console.log('Please keep your fresh keypair, consisting of a private key (used to decrypt files, should be known only to *you*) and your public key (used to send) in a safe and appropriate location.\n BE AWARE YOUR KEYS WILL NOT BE STORED BY THIS APPLICATION!!\n Private key: '+keypair.privateKeyArmored+';\n Public key: '+keypair.publicKeyArmored);
+
+            fields.userhash = userhash;
+        }
 
         fs.readFile("./tmp/test.txt", 'utf8', function(err, data){
             pgp.encryptMessage(keypair.keys, data).then(function(encrypted){
@@ -70,20 +72,15 @@ function upload(response, request){
             });
         });
 
-        console.log('Please keep your fresh keypair, consisting of a private key (used to decrypt files, should be known only to *you*) and your public key (used to send) in a safe and appropriate location.\n BE AWARE YOUR KEYS WILL NOT BE STORED BY THIS APPLICATION!!\n Private key: '+keypair.privateKeyArmored+';\n Public key: '+keypair.publicKeyArmored);
+        keypair = null;
+    });
 
-        keypair = null; //we keep a copy of the public key but not the priv key.
-    }
-
-    fields.userhash = userhash;
-
-  });
-
-  response.writeHead(200, {"Content-Type": "text/html"});
-  response.write("received image:<br/>");
-  response.write("'/show'");
-  response.end()
+    response.writeHead(200, {"Content-Type": "text/html"});
+    response.write("received image:<br/>");
+    response.write("'/show'");
+    response.end();
 }
+
 
 function show(response){
   console.log("request handler 'show' was called.");
