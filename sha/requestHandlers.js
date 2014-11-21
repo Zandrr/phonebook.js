@@ -1,6 +1,6 @@
 var querystring = require('querystring'),
     fs          = require('fs'),
-    crypto      = require('crypto'),
+    crypto      = require('crypto-js'),
     formidable  = require('formidable'),
     pgp         = require('openpgp');
 function start(response){
@@ -28,7 +28,6 @@ function upload(response, request){
     console.log("Request handler 'upload' was called.");
 
     var form = new formidable.IncomingForm();
-    var filehash = crypto.createHash('sha256');
     console.log("about to parse");
 
     form.parse(request, function(err, fields, files){
@@ -37,20 +36,34 @@ function upload(response, request){
             fs.rename(files.upload.path, "./tmp/test.txt");
         }
 
-    var userhash = crypto.createHmac('sha256');
+    if (!fields.destination) {
+        console.log("Destination field was null. Encrypting with no set destination.");
+    }
+
+    var userhash = "";
 
     if (fields.username) {
         //if a username (a client's public key acts as their unique identifier)
         //and keyword are given: create hash based on the public key for user identification.
         //note that the keyword (password) should not be transmitted onward, nor should the username!!
-        userhash.update(fields.username).digest('base64');
+        userhash = crypto.SHA3(fields.username);
     }else {
         //user doesn't have a key pair yet, so create a new one.
-        //keyword field should be required.
         var keypair = pgp.generateKeyPair({numBits: 4096, userId: 'user', passphrase: fields.keyword});
         var username = keypair.publicKeyArmored;
-        userhash.update(username).digest('base64');
+
+        userhash = crypto.SHA3(username);
         fields.username = username;
+
+        fs.readFile("./tmp/test.txt", 'utf8', function(err, data){
+            pgp.encryptMessage(keypair.keys, data).then(function(encryptedFile){
+                var hash = crypto.SHA3(encryptedFile, {outputLength: 256});
+                fs.writeFile("./tmp/test.txt", username+', '+userhash+'\n'+encryptedFile+', '+hash+'\n');
+            }).catch(function(error){
+                console.log("Encryption of your file has failed.");
+                throw(error);
+            });
+        });
 
         console.log('Please keep your fresh keypair, consisting of a private key (used to decrypt files, should be known only to *you*) and your public key (used to send) in a safe and appropriate location.\n BE AWARE YOUR KEYS WILL NOT BE STORED BY THIS APPLICATION!!\n Private key: '+keypair.privateKeyArmored+';\n Public key: '+keypair.publicKeyArmored);
 
@@ -59,10 +72,6 @@ function upload(response, request){
 
     fields.userhash = userhash;
 
-  });
-
-  fs.readFile("./tmp/test.txt", 'utf8', function(err, data){
-        fs.writeFile("./tmp/test.txt", data+'\n'+hash.update(data).digest('base64'));
   });
 
   response.writeHead(200, {"Content-Type": "text/html"});
