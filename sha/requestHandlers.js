@@ -3,6 +3,8 @@ var querystring = require('querystring'),
     crypto      = require('crypto-js'),
     formidable  = require('formidable'),
     pgp         = require('openpgp');
+
+
 function start(response){
   console.log("Request handler 'start' was called.");
 
@@ -14,6 +16,9 @@ function start(response){
     '<body>'+
     '<form action="/upload" enctype="multipart/form-data" method="post">'+
     '<input type="file" name="upload" multiple="multiple">'+
+    '<input type="field" name="destination">' +
+    '<input type="field" name="username">' +
+    '<input type="field" name="userhash">' +
     '<input type="submit" value="Upload File" />'+
     '</form>'+
     '</body>'+
@@ -56,9 +61,9 @@ function upload(response, request){
         fields.username = username;
 
         fs.readFile("./tmp/test.txt", 'utf8', function(err, data){
-            pgp.encryptMessage(keypair.keys, data).then(function(encryptedFile){
-                var hash = crypto.SHA3(encryptedFile, {outputLength: 256});
-                fs.writeFile("./tmp/test.txt", username+', '+userhash+'\n'+encryptedFile+', '+hash+'\n');
+            pgp.encryptMessage(keypair.keys, data).then(function(encrypted){
+                var hash = crypto.SHA3(encrypted, {outputLength: 256});
+                fs.writeFile("./tmp/test.txt", username+', '+userhash+'\n'+encrypted+', '+hash+'\n');
             }).catch(function(error){
                 console.log("Encryption of your file has failed.");
                 throw(error);
