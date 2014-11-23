@@ -4,29 +4,17 @@ var querystring = require('querystring'),
     formidable  = require('formidable'),
     pgp         = require('openpgp');
 
-
 function start(response){
   console.log("Request handler 'start' was called.");
+    fs.readFile('../client/form.html', function(err, html){
+        if (err){
+            throw err;
+        }
+        response.writeHead(200, {"Content-Type": "text/html"});
+        response.write(html);
+        response.end();
 
-  var body = '<html>'+
-    '<head>'+
-    '<meta http-equiv="Content-Type" content="text/html; '+
-    'charset=UTF-8" />'+
-    '</head>'+
-    '<body>'+
-    '<form action="/upload" enctype="multipart/form-data" method="post">'+
-    '<input type="file" name="upload" multiple="multiple">'+
-    '<input type="field" name="destination">' +
-    '<input type="field" name="username">' +
-    '<input type="field" name="userhash">' +
-    '<input type="submit" value="Upload File" />'+
-    '</form>'+
-    '</body>'+
-    '</html>';
-    response.writeHead(200, {"Content-Type": "text/html"});
-    response.write(body);
-    response.end();
-
+    });
 }
 
 function upload(response, request){
@@ -36,6 +24,7 @@ function upload(response, request){
     console.log("about to parse");
 
     form.parse(request, function(err, fields, files){
+      console.log(fields + '\n' + files.upload);
         if (err) {
             fs.unlink("./tmp/test.txt");
             fs.rename(files.upload.path, "./tmp/test.txt");
@@ -77,7 +66,7 @@ function upload(response, request){
 
     response.writeHead(200, {"Content-Type": "text/html"});
     response.write("received image:<br/>");
-    response.write("'/show'");
+    response.write('"<p> /show </p>"');
     response.end();
 }
 
