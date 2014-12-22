@@ -5,7 +5,7 @@ var querystring = require('querystring'),
     pgp         = require('openpgp');
 
 function start(response){
-  console.log("Request handler 'start' was called.");
+  console.log("Starting response!");
     fs.readFile('../client/form.html', function(err, html){
         if (err){
             throw err;
@@ -18,13 +18,13 @@ function start(response){
 }
 
 function upload(response, request){
-    console.log("Request handler 'upload' was called.");
+    console.log("Beginning upload...");
 
     var form = new formidable.IncomingForm();
-    console.log("about to parse");
 
     form.parse(request, function(err, fields, files){
-      console.log(fields + '\n' + files.upload);
+       console.log(JSON.stringify(fields, null, 4) + '\n' + JSON.stringify(files.upload, null, 4));
+        //this is going to need to change (we need a filename variable)
         if (err) {
             fs.unlink("./tmp/test.txt");
             fs.rename(files.upload.path, "./tmp/test.txt");
@@ -34,11 +34,11 @@ function upload(response, request){
             console.log("Destination field was null. Encrypting with no set destination.");
         }
 
-        var keypair = null;
+        var keypair = '-----BEGIN PGP PUBLIC KEY BLOCK ... END PGP PUBLIC KEY BLOCK-----';
 
         if (fields.username) {
             fields.userhash = crypto.SHA3(fields.username);
-            keypair = pgp.key.readArmored(fields.username);
+            fields.username = pgp.key.readArmored(keypair);
         }else {
             //user doesn't have a key pair yet, so create a new one.
             keypair = pgp.generateKeyPair({numBits: 4096, userId: 'user', passphrase: fields.keyword});
@@ -46,11 +46,12 @@ function upload(response, request){
 
             fields.username = username;
             fields.userhash = crypto.SHA3(username);
-            console.log('Please keep your fresh keypair, consisting of a private key (used to decrypt files, should be known only to *you*) and your public key (used to send) in a safe and appropriate location.\n BE AWARE YOUR KEYS WILL NOT BE STORED BY THIS APPLICATION!!\n Private key: '+keypair.privateKeyArmored+';\n Public key: '+keypair.publicKeyArmored);
+            console.log('Please keep your fresh keypair, consisting of a private key (used to decrypt files, should be known only to *you*) and your public key (used to send) in a safe and appropriate location (on a usb stick works).\n BE AWARE YOUR KEYS WILL NOT BE STORED BY THIS APPLICATION!!\n Private key: '+keypair.privateKeyArmored+';\n Public key: '+keypair.publicKeyArmored);
 
             fields.userhash = userhash;
         }
 
+        //file variable name
         fs.readFile("./tmp/test.txt", 'utf8', function(err, data){
             pgp.encryptMessage(keypair.keys, data).then(function(encrypted){
                 var hash = crypto.SHA3(encrypted, {outputLength: 256});
@@ -65,14 +66,13 @@ function upload(response, request){
     });
 
     response.writeHead(200, {"Content-Type": "text/html"});
-    response.write("received image:<br/>");
+    response.write("received image:<br/>"); //this should change
     response.write('"<p> /show </p>"');
     response.end();
 }
 
-
 function show(response){
-  console.log("request handler 'show' was called.");
+  console.log("Responding!");
   response.writeHead(200, {"Content-Type": "text/plain"});
   fs.createReadStream("./tmp/test.txt").pipe(response);
 }

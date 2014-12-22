@@ -1,28 +1,37 @@
 {
-    "name": "phonebook",
-    "repository":"https://github.com/kaoudis/phonebook.js",
-    "description": "A secure, distributed relational database of file hashes, users, and onion locations",
-    "main": "phonebook.js",
-    "repository": "",
-    "keywords": [
-        "phonebook",
-        "tls",
-        "encrypted",
-        "relational",
-        "database"
-    ],
-    "dependencies" : [
-        "openpgp",
-        "orm",
-        "json-buffer",
-        "sqlite3",
-        "crypto-js"
-    ],
-    "contributors": [
-        "Kelly Kaoudis kaoudis@colorado.edu",
-        "Alex Campbell alexander.campbell@colorado.edu"
-    ],
-    "license": "MIT",
-    "readmeFilename": "README.md",
-    "scripts": { }
+  "name": "phonebook",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kaoudis/phonebook.js.git"
+  },
+  "description": "A secure, distributed relational database of file hashes, users, and onion locations",
+  "main": "phonebook.js",
+  "keywords": [
+    "phonebook",
+    "tls",
+    "encrypted",
+    "relational",
+    "database"
+  ],
+  "dependencies": {
+    "crypto-js": "^3.1.2-5",
+    "json-buffer": "^2.0.11",
+    "openpgp": "^0.9.0"
+  },
+  "contributors": [
+    "Kelly Kaoudis kaoudis@colorado.edu",
+    "Alex Campbell alexander.campbell@colorado.edu"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "start": "node sha/index.js",
+    "test":"node testall.js"
+  },
+  "version": "1.0.0",
+  "devDependencies": {},
+  "author": "Kelly Kaoudis",
+  "bugs": {
+    "url": "https://github.com/kaoudis/phonebook.js/issues"
+  },
+  "homepage": "https://github.com/kaoudis/phonebook.js"
 }
