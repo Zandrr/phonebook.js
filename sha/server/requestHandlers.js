@@ -4,11 +4,13 @@ var querystring = require('querystring'),
     pgp         = require('openpgp'),
     sha         = require('../../node_modules/openpgp/src/crypto/hash/sha.js');
 
+var DEBUG = 1;
+
 function start(response){
     fs.readFile('../client/form.html', function(err, html){
-        if (err){
-            throw err;
-        }
+     //   if (err){
+     //       throw err;
+     //   }
         response.writeHead(200, {"Content-Type": "text/html"});
         response.write(html);
         response.end();
@@ -18,12 +20,14 @@ function start(response){
 
 function upload(response, request){
     var file = ""; //name to be written back for the response
-
     var form = new formidable.IncomingForm();
 
     form.parse(request, function(err, fields, files){
-       //debugging output
-       console.log(JSON.stringify(fields, null, 4) + '\n' + JSON.stringify(files.upload, null, 4));
+        if (DEBUG) {
+
+          if(!fields.username) fields.username = "generating new keypair...";
+          console.log("Public key? "+fields.username+',\nDestination: '+fields.destination+',\nFiledata: \n'+JSON.stringify(files.upload, null, 4));
+        }
 
         //this is going to need to change (we need a filename variable)
         if (err) {
@@ -43,26 +47,28 @@ function upload(response, request){
         }
 
         fields.username = pgp.key.readArmored(key);
-        fields.userhash = sha.sha512(fields.username);
+        fields.userhash = sha.sha512(fields.username); //user-id (temp for now -- shorten?)
 
-        file = fields.userhash; //just for debug for now so we can print something
+        file = fields.userhash; //debug
         console.log("\nHASH: "+file);
 
         //file variable name
         fs.readFile("./tmp/test.txt", 'utf8', function(err, data){
-            pgp.encryptMessage(key.keys, data).then(function(encrypted){
+            pgp.encryptMessage(fields.username, data).then(function(encrypted){
                 var hash = sha.sha512(encrypted);
                 fs.writeFile("./tmp/test.txt", username+', '+userhash+'\n'+encrypted+', '+hash+'\n');
+
             }).catch(function(error){
-                console.log("Encryption of your file has failed.");
+                console.log("Encryption of your file failed. Ending transaction.");
                 throw(error);
+                return;
             });
         });
 
     });
 
     response.writeHead(200, {"Content-Type": "text/html"});
-    response.write("received image! "+file+"<br>"); //this should change
+    response.write("<strong>Encrypting...</strong> "+file+"<br>"); //this should change
     response.write('"<p> /show </p>"');
     response.end();
 }
