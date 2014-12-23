@@ -23,12 +23,6 @@ function upload(response, request){
     var form = new formidable.IncomingForm();
 
     form.parse(request, function(err, fields, files){
-        if (DEBUG) {
-
-          if(!fields.username) fields.username = "generating new keypair...";
-          console.log("Public key? "+fields.username+',\nDestination: '+fields.destination+',\nFiledata: \n'+JSON.stringify(files.upload, null, 4));
-        }
-
         //this is going to need to change (we need a filename variable)
         if (err) {
             fs.unlink("./tmp/test.txt");
@@ -36,32 +30,45 @@ function upload(response, request){
         }
 
         if (!fields.destination) {
-            console.log("Destination field was null. Encrypting with no set destination.");
+            console.log("Destination not provided; encrypting with no set destination.");
         }
 
         var key = '-----BEGIN PGP PUBLIC KEY BLOCK ... END PGP PUBLIC KEY BLOCK-----';
 
-        if (!fields.username) {
+        if (!fields.pk) {
             //generate a fresh keypair on the spot instead of having the user upload one.
+
+            if (DEBUG) {
+                fields.pk = "generating new keypair...";
+                console.log("Public key? "+fields.pk);
+                if (fields.destination) console.log('Destination: '+fields.destination);
+                console.log('Data synopsis: \n'+JSON.stringify(files.upload, null, 4));
+            }
+
             key = pgp.generateKeyPair({numBits: 4096, userId: 'user', passphrase: fields.keyword});
-        }
+            if (key) console.log('New keypair successfully generated!');
 
-        fields.username = pgp.key.readArmored(key);
-        fields.userhash = sha.sha512(fields.username); //user-id (temp for now -- shorten?)
+        } else key = fields.pk; //public key only
 
-        file = fields.userhash; //debug
+        fields.pk = pgp.key.readArmored(key);
+        fields.pkhash = sha.sha512(pgp.key.readArmored(key)); //user-id (temp for now -- shorten?)
+
+        file = fields.pkhash; //debug
         console.log("\nHASH: "+file);
 
-        //file variable name
+        //file variable name!!!!!
         fs.readFile("./tmp/test.txt", 'utf8', function(err, data){
-            pgp.encryptMessage(fields.username, data).then(function(encrypted){
+            pgp.encryptMessage(pgp.key.readArmored(key).keys, data).then(function(encrypted){
+
+                if (DEBUG) console.log('Data encrypted!');
+
                 var hash = sha.sha512(encrypted);
-                fs.writeFile("./tmp/test.txt", username+', '+userhash+'\n'+encrypted+', '+hash+'\n');
+                fs.writeFile("./tmp/test.txt", pk+', '+pkhash+'\n'+encrypted+', '+hash+'\n');
 
             }).catch(function(error){
-                console.log("Encryption of your file failed. Ending transaction.");
+                console.log("Encryption of your data failed. Ending transaction.");
                 throw(error);
-                return;
+                exit;
             });
         });
 
