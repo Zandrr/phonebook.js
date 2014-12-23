@@ -4,13 +4,14 @@
     "type": "git",
     "url": "https://github.com/kaoudis/phonebook.js.git"
   },
-  "description": "A secure, distributed relational database of file hashes, users, and onion locations",
+  "description": "A secure, distributed no-SQL-esque hash database of files and users' public keys.",
   "main": "phonebook.js",
   "keywords": [
     "phonebook",
     "tls",
     "encrypted",
-    "relational",
+    "noSQL",
+    "cryptography",
     "database"
   ],
   "dependencies": {
