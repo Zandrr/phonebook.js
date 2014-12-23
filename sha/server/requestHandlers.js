@@ -1,9 +1,8 @@
 var querystring = require('querystring'),
     fs          = require('fs'),
-    crypto      = require('crypto-js'),
     formidable  = require('formidable'),
-    pgp         = require('openpgp');
-
+    pgp         = require('openpgp'),
+    sha         = require('../../node_modules/openpgp/src/crypto/hash/sha.js');
 
 function start(response){
     fs.readFile('../client/form.html', function(err, html){
@@ -23,7 +22,9 @@ function upload(response, request){
     var form = new formidable.IncomingForm();
 
     form.parse(request, function(err, fields, files){
+       //debugging output
        console.log(JSON.stringify(fields, null, 4) + '\n' + JSON.stringify(files.upload, null, 4));
+
         //this is going to need to change (we need a filename variable)
         if (err) {
             fs.unlink("./tmp/test.txt");
@@ -42,12 +43,15 @@ function upload(response, request){
         }
 
         fields.username = pgp.key.readArmored(key);
-        fields.userhash = crypto.SHA3(fields.username);
+        fields.userhash = sha.sha512(fields.username);
+
+        file = fields.userhash; //just for debug for now so we can print something
+        console.log("\nHASH: "+file);
 
         //file variable name
         fs.readFile("./tmp/test.txt", 'utf8', function(err, data){
             pgp.encryptMessage(key.keys, data).then(function(encrypted){
-                var hash = crypto.SHA3(encrypted, {outputLength: 256});
+                var hash = sha.sha512(encrypted);
                 fs.writeFile("./tmp/test.txt", username+', '+userhash+'\n'+encrypted+', '+hash+'\n');
             }).catch(function(error){
                 console.log("Encryption of your file has failed.");
@@ -58,7 +62,7 @@ function upload(response, request){
     });
 
     response.writeHead(200, {"Content-Type": "text/html"});
-    response.write("received image:"+file+"<br/>"); //this should change
+    response.write("received image! "+file+"<br>"); //this should change
     response.write('"<p> /show </p>"');
     response.end();
 }
