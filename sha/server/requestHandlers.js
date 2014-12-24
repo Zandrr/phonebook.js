@@ -8,9 +8,10 @@ var DEBUG = 1;
 
 function start(response){
     fs.readFile('../client/form.html', function(err, html){
-     //   if (err){
-     //       throw err;
-     //   }
+        if (err){
+            throw err;
+        }
+
         response.writeHead(200, {"Content-Type": "text/html"});
         response.write(html);
         response.end();
@@ -85,6 +86,12 @@ function show(response){
   fs.createReadStream("./tmp/test.txt").pipe(response);
 }
 
-exports.start   = start;
-exports.upload  = upload;
-exports.show    = show;
+function download(pkB, pkA, file) {
+
+
+}
+
+exports.start    = start;
+exports.upload   = upload;
+exports.show     = show;
+exports.download = download;

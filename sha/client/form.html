@@ -5,34 +5,34 @@
         <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
     </head>
     <body>
+        <div class="jumbotron">
+        <div class="container">
+            <h1>Encrypt data!</h1>
+            <h2>(a) Supply your public key and/or at least one destination,
+            <br>(b) let us create a public key for you, or
+            <br>(c) allow anyone to download this file.</h2>
+            <br>
+            <h3>Lorem ipsum...</h3>
         <form role="form" class="form-horizontal" action="/upload" enctype="multipart/form-data" method="post">
-            <div class="form-group">
-                    <div class="col-sm-2">
-                    <label>File</label>
-                        <input type="file" class="form-control" name="upload" multiple="multiple">
+            <div class="form-group form-group-lg well">
+                    <div class="row-sm-1">
+                        <input type="file" class="form-control-sm" name="upload" multiple="multiple">
                     </div>
-            </div>
-            <div class="form-group">
-                    <div class="col-sm-3">
-                    <label>Destination</label>
-                        <input type="field" name="destination">
+                    <div class="row-sm-3">
+                        <label>Recipient</label>
+                        <input type="field" placeholder="Dest. pub key (optional)" name="destination">
                     </div>
-            </div>
-            <div class="form-group">
-                    <div class="col-sm-3">
-                    <label>Public Key (optional)</label>
-                        <input type="field" name="pk">
+                    <div class="row-sm-3">
+                        <label>My key</label>
+                        <input type="field" placeholder="My pub key (optional)" name="pk">
                     </div>
-            </div>
-            <div class="form-group">
-                        <input type="hidden" name="pkhash">
-                </div>
-            </div>
-            <div class="form-group">
-                    <div class="col-sm-3">
-                        <input type="submit" value="Upload and Encrypt">
+                    <input type="hidden" name="pkhash"></div>
+                    <div class="row-sm-3">
+                        <input type="submit" class="btn btn-default" value="Encrypt and send">
                     </div>
             </div>
         </form>
+        </div>
+        </div>
     </body>
 </html>
