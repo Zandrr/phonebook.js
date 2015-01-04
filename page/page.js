@@ -1,4 +1,4 @@
-//create a simple database instance based (for now) on the core
+//create a simple database instance based very loosely on the core
 //functionality of Apache's CouchDB. We're not trying to infringe
 //on their intellectual property, just to create something entirely
 //different that builds on some of the same ideas.
@@ -6,8 +6,7 @@
 function page(name, uri, headers) {
     this.name = name; //nick of this database
     this.uri = uri;
-
-    this.tagMap = new Map(); //map full Tags to lists of chunk positions
+    this.tagMap = new WeakMap(); //map full Tags to lists of chunk positions
 
     //do one or more chunks tagged with this Tag exist in this DB node?
     this.tagQuery = function() {
@@ -28,11 +27,6 @@ function page(name, uri, headers) {
 
     }
 
-    //Floodfill
-    this.getTag = function() {
-
-    }
-
     //are we the initial destination? pass the object on
     //otherwise, store it in the next (random) open slot
     this.putTaggedChunk = function() {
@@ -40,6 +34,28 @@ function page(name, uri, headers) {
     }
 
     this.deleteTag = function() {
+
+
+    }
+
+
+    //Floodfill helper
+    this.getTag = function() {
+
+    }
+
+
+    this.getNeighbour = function() {
+
+
+    }
+
+    this.nope = function() {
+
+
+    }
+
+    this.onSuccess = function() {
 
 
     }
