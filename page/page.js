@@ -1,24 +1,26 @@
-//create a simple database instance based very loosely on the core
-//functionality of Apache's CouchDB. We're not trying to infringe
-//on their intellectual property, just to create something entirely
-//different that builds on some of the same ideas.
+//create a (simple) single-node instance.
+//last updated January 2015
 
-function page(name, uri, headers) {
+function page(name, uri) {
     this.name = name; //nick of this database
     this.uri = uri;
     this.tagMap = new WeakMap(); //map full Tags to lists of chunk positions
 
-    //do one or more chunks tagged with this Tag exist in this DB node?
-    this.tagQuery = function() {
-
-
+    this.tagQuery = function(tag) {
+        if (this.tagMap.has(tag)) return this.tagMap.get(tag);
     }
 
     //check to ensure each chunk added to the DB for temporary storage
     //doesn't match the Tag on any currently existing chunk
-    this.consolidateTags = function() {
+    this.consolidateTags = function(tag, chunk) {
+        if (this.tagMap.has(tag)) {
+            updatedChunklist = null;
+            updatedChunklist = this.tagMap.get(tag);
+            updatedChunklist.add(chunk);
+            this.tagMap.set(tag, updatedChunklist);
 
-
+            return true;
+        }else return false;
     }
 
     //get sequence number of chunk
