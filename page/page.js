@@ -8,6 +8,11 @@
 function page(name, uri) {
     this.name = name; //nick of this database
     this.uri = uri;
+
+    this.nodesMap = new Map(); //strongly map node nicks to IPs (we want a list of keys in this case)
+    this.neighbour1 = null; //save a randomly selected pair o' pals for quick updates
+    this.neighbour2 = null;
+
     this.sourceMap = new WeakMap(); //map source list to Tags
     this.destMap = new WeakMap(); //map lists of dests to Tags
     this.tagMap = new WeakMap(); //map full Tags to lists of chunk positions
@@ -37,8 +42,12 @@ function page(name, uri) {
 
     //are we the initial destination? pass the object on
     //otherwise, store it in the next (random) open slot
-    this.putTaggedChunk = function() {
-
+    this.putTaggedChunk = function(sourceID, tag, chunk) {
+        if ((this.name != sourceID) && this.nodesMap.has(sourceID)) {
+            this.consolidateTags(tag, chunk);
+        }else { //send forth
+            this.sendToNeighbour(sourceID, tag, chunk);
+        }
     }
 
     this.deleteTag = function() {
@@ -51,12 +60,28 @@ function page(name, uri) {
 
     }
 
-    this.nope = function() {
+    this.sendToNeighbour = function(sourceID, tag, chunk) {
+
+    }
+
+    this.updateNeighbourNodesList = function() {
+
+    }
+
+    this.addSelfToNopes = function() {
 
 
     }
 
-    this.onSuccess = function() {
+    //send a response back to neighbour1 to send back to sourceID
+    this.onSuccessfulChunkAdd = function(sourceID, tag, chunk, response) {
+
+
+    }
+
+    //when the node owner wants to "turn off" this copy of the db
+    //we need to spread our data across other nodes.
+    this.goOffline = function() {
 
 
     }
