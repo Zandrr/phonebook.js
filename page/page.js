@@ -50,9 +50,11 @@ function page(name, uri) {
         }
     }
 
-    this.deleteTag = function() {
-
-
+    //only to be used after chunks have been sent and TTL has expired on tag
+    this.deleteTag = function(tag) {
+        if (this.tagMap.has(tag)) {
+            this.tagMap.delete(tag);
+        }
     }
 
     this.getNeighbour = function() {
