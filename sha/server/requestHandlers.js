@@ -24,10 +24,10 @@ function upload(response, request){
     var form = new formidable.IncomingForm();
 
     form.parse(request, function(err, fields, files){
-        //this is going to need to change (we need a filename variable)
+    //need to handle files that don't exist somehow (throwing an ENOENT is hardly helpful)
+
+
         if (err) {
-            //fs.unlink("/tmp/test.txt");
-            //fs.rename(files.upload.path, "/tmp/test.txt");
             fs.unlink(files.upload.path);
             throw(err);
         }
@@ -53,9 +53,9 @@ function upload(response, request){
             }
 
             if (fields.keyword) {
-                key = pgp.generateKeyPair({numBits: 4096, userId: 'user', passphrase: fields.keyword});
+                key = pgp.generateKeyPair({numBits: 4096, userId: fields.user, passphrase: fields.keyword});
             }else {
-                key = pgp.generateKeyPair({numBits: 4096, userId: 'user'});
+                key = pgp.generateKeyPair({numBits: 4096, userId: fields.user});
             }
 
             if (key) {
@@ -66,13 +66,8 @@ function upload(response, request){
 
         fields.pk = pgp.key.readArmored(key);
         fields.pkhash = sha.sha512(pgp.key.readArmored(key)); //user-id (temp for now -- shorten?)
-        //console.log("Public: "+fields.pk.publicKeyArmored+"\n");
-        //console.log("Private: "+fields.pk.privateKeyArmored+"\n");
 
-        if (fields.pkhash) console.log("public key hash successful\n");
-
-        //file variable name!!!!!
-        fs.readFile(files.upload.path, 'utf8', function(err, data){
+        fs.readFile(FILENAME, 'utf8', function(err, data){
                 if (err) {
                     return console.log(err);
                 }
