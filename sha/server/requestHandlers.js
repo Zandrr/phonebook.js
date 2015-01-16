@@ -5,6 +5,7 @@ var querystring = require('querystring'),
     sha         = require('../../node_modules/openpgp/src/crypto/hash/sha.js');
 
 var DEBUG = 1;
+var FILENAME = "";
 
 function start(response){
     fs.readFile('../client/form.html', function(err, html){
@@ -20,15 +21,18 @@ function start(response){
 }
 
 function upload(response, request){
-    var file = ""; //name to be written back for the response
     var form = new formidable.IncomingForm();
 
     form.parse(request, function(err, fields, files){
         //this is going to need to change (we need a filename variable)
         if (err) {
-            fs.unlink("./tmp/test.txt");
-            fs.rename(files.upload.path, "./tmp/test.txt");
+            //fs.unlink("/tmp/test.txt");
+            //fs.rename(files.upload.path, "/tmp/test.txt");
+            fs.unlink(files.upload.path);
+            throw(err);
         }
+
+        FILENAME = files.upload.path;
 
         if (!fields.destinationKeyList) {
             console.log("Encrypting file with no set destination(s).");
@@ -62,38 +66,45 @@ function upload(response, request){
 
         fields.pk = pgp.key.readArmored(key);
         fields.pkhash = sha.sha512(pgp.key.readArmored(key)); //user-id (temp for now -- shorten?)
-        console.log("Public: "+fields.pk.publicKeyArmored+"\n");
-        console.log("Private: "+fields.pk.privateKeyArmored+"\n");
+        //console.log("Public: "+fields.pk.publicKeyArmored+"\n");
+        //console.log("Private: "+fields.pk.privateKeyArmored+"\n");
 
-        file = fields.pkhash; //debug
-        console.log("\nHASH: "+file);
+        if (fields.pkhash) console.log("public key hash successful\n");
 
         //file variable name!!!!!
-        fs.readFile("./tmp/test.txt", 'utf8', function(err, data){
+        fs.readFile(files.upload.path, 'utf8', function(err, data){
                 if (err) {
                     return console.log(err);
                 }
 
                 var ciphertext = pgp.encryptMessage(fields.pk.keys, data);
+
                 if (ciphertext) {
-                var hash = sha.sha512(ciphertext);
-                fs.writeFile("./tmp/test.txt", fields.pk.keys+', '+fields.pkhash+'\n'+ciphertext+', '+hash+'\n');
-            } else {
-                console.log("Encryption of your data failed. Ending transaction.");
-            }
+                    var hash = sha.sha512(ciphertext);
+                    fs.writeFile(FILENAME, fields.pk.keys+', '+fields.pkhash+'\n'+ciphertext+', '+hash+'\n');
+                } else {
+                    console.log("Encryption of your data failed. Ending transaction.");
+                }
         });
 
     });
 
-    response.writeHead(200, {"Content-Type": "text/html"});
-    response.write("<strong>Encrypting...</strong> "+file+"<br>"); //this should change
-    response.write('"<p> /show </p>"');
-    response.end();
+    //go to next screen
+    fs.readFile('../client/upload.html', function(err, html){
+        if (err) {
+            throw(err);
+        }
+
+        response.writeHead(200, {"Content-Type": "text/html"});
+        response.write(html);
+        response.end();
+        show(response);
+    });
 }
 
 function show(response){
   response.writeHead(200, {"Content-Type": "text/plain"});
-  fs.createReadStream("./tmp/test.txt").pipe(response);
+  fs.createReadStream(FILENAME).pipe(response);
 }
 
 function download(pkB, pkA, file) {
