@@ -52,6 +52,8 @@ function upload(response, request){
                 console.log('Data synopsis: \n'+JSON.stringify(files.upload, null, 4));
             }
 
+            //not sure if we need userid, possibly ask Matt or JB regarding PGP's simplest setup
+
             if (fields.keyword) {
                 key = pgp.generateKeyPair({numBits: 4096, userId: fields.user, passphrase: fields.keyword});
             }else {
@@ -60,7 +62,7 @@ function upload(response, request){
 
             if (key) {
                 console.log('New keypair successfully generated!');
-            }
+            }else throw(key);
 
         }
 
@@ -72,7 +74,8 @@ function upload(response, request){
                     return console.log(err);
                 }
 
-                var ciphertext = pgp.encryptMessage(fields.pk.keys, data);
+                var priv = pgp.key.readArmored(key).keys[0];
+                var ciphertext = pgp.signAndEncryptMessage(fields.pk, priv, data);
 
                 if (ciphertext) {
                     var hash = sha.sha512(ciphertext);
