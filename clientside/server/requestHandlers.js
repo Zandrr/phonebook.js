@@ -73,6 +73,26 @@ function bootstrap(response) {
     });
 }
 
+function woff(response) {
+    fs.readFile('../client/fonts/Chunkfive-webfont.woff', function(err, html) {
+        if (err) {
+            throw(err);
+        }
+
+        respond(response, html);
+    });
+}
+
+function ttf(response) {
+    fs.readFile('../client/fonts/Chunkfive-webfont.ttf', function(err, html) {
+        if (err) {
+            throw(err);
+        }
+
+        respond(response, html);
+    });
+}
+
 function upload(response, request){
     var form = new formidable.IncomingForm();
 
@@ -166,4 +186,5 @@ exports.minJS     = minJS;
 exports.jquery    = jquery;
 exports.mainCSS   = mainCSS;
 exports.bootstrap = bootstrap;
-
+exports.woff      = woff;
+exports.ttf       = ttf;
