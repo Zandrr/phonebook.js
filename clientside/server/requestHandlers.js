@@ -7,16 +7,69 @@ var querystring = require('querystring'),
 var DEBUG = 1;
 var FILENAME = "";
 
+function respond(response, html) {
+    response.writeHead(200, {"Content-Type": "text/html"});
+    response.write(html);
+    response.end();
+}
+
 function start(response){
-    fs.readFile('../client/form.html', function(err, html){
+    fs.readFile('../client/home.html', function(err, html){
         if (err){
             throw err;
         }
 
-        response.writeHead(200, {"Content-Type": "text/html"});
-        response.write(html);
-        response.end();
+        respond(response, html);
+    });
+}
 
+function minCSS(response) {
+    fs.readFile('../client/assets/bootstrap.min.css', function(err, html) {
+        if (err) {
+            throw(err);
+        }
+
+        respond(response, html);
+    });
+}
+
+function minJS(response) {
+    fs.readFile('../client/assets/bootstrap.min.js', function(err, html) {
+        if (err) {
+            throw(err);
+        }
+
+        respond(response, html);
+    });
+}
+
+function jquery(response) {
+    fs.readFile('../client/assets/jquery.js', function(err, html) {
+        if (err) {
+            throw(err);
+        }
+
+        respond(response, html);
+    });
+}
+
+function mainCSS(response) {
+    fs.readFile('../client/assets/main.css', function(err, html) {
+        if (err) {
+            throw(err);
+        }
+
+        respond(response, html);
+    });
+}
+
+function bootstrap(response) {
+    fs.readFile('../client/assets/bootstrap.css', function(err, html) {
+        if (err) {
+            throw(err);
+        }
+
+        respond(response, html);
     });
 }
 
@@ -105,12 +158,12 @@ function show(response){
   fs.createReadStream(FILENAME).pipe(response);
 }
 
-function download(pkB, pkA, file) {
+exports.start     = start;
+exports.upload    = upload;
+exports.show      = show;
+exports.minCSS    = minCSS;
+exports.minJS     = minJS;
+exports.jquery    = jquery;
+exports.mainCSS   = mainCSS;
+exports.bootstrap = bootstrap;
 
-
-}
-
-exports.start    = start;
-exports.upload   = upload;
-exports.show     = show;
-exports.download = download;
