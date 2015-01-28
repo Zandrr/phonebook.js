@@ -4,99 +4,20 @@ var querystring = require('querystring'),
     pgp         = require('openpgp'),
     sha         = require('../../node_modules/openpgp/src/crypto/hash/sha.js');
 
-var DEBUG = 1;
-var FILENAME = "";
+module.exports = function(app){
 
-function respond(response, html) {
-    response.writeHead(200, {"Content-Type": "text/html"});
-    response.write(html);
-    response.end();
-}
+  var DEBUG = 1;
+  var FILENAME = "";
 
-function start(response){
-    fs.readFile('../client/home.html', function(err, html){
-        if (err){
-            throw err;
-        }
+  app.get('/', function(req, res) {
+    res.render('index');
+  });
 
-        respond(response, html);
-    });
-}
 
-function minCSS(response) {
-    fs.readFile('../client/assets/bootstrap.min.css', function(err, html) {
-        if (err) {
-            throw(err);
-        }
-
-        respond(response, html);
-    });
-}
-
-function minJS(response) {
-    fs.readFile('../client/assets/bootstrap.min.js', function(err, html) {
-        if (err) {
-            throw(err);
-        }
-
-        respond(response, html);
-    });
-}
-
-function jquery(response) {
-    fs.readFile('../client/assets/jquery.js', function(err, html) {
-        if (err) {
-            throw(err);
-        }
-
-        respond(response, html);
-    });
-}
-
-function mainCSS(response) {
-    fs.readFile('../client/assets/main.css', function(err, html) {
-        if (err) {
-            throw(err);
-        }
-
-        respond(response, html);
-    });
-}
-
-function bootstrap(response) {
-    fs.readFile('../client/assets/bootstrap.css', function(err, html) {
-        if (err) {
-            throw(err);
-        }
-
-        respond(response, html);
-    });
-}
-
-function woff(response) {
-    fs.readFile('../client/fonts/Chunkfive-webfont.woff', function(err, html) {
-        if (err) {
-            throw(err);
-        }
-
-        respond(response, html);
-    });
-}
-
-function ttf(response) {
-    fs.readFile('../client/fonts/Chunkfive-webfont.ttf', function(err, html) {
-        if (err) {
-            throw(err);
-        }
-
-        respond(response, html);
-    });
-}
-
-function upload(response, request){
+  app.post('/upload', function(req,res){
     var form = new formidable.IncomingForm();
 
-    form.parse(request, function(err, fields, files){
+    form.parse(req, function(err, fields, files){
     //need to handle files that don't exist somehow (throwing an ENOENT is hardly helpful)
 
 
@@ -161,30 +82,16 @@ function upload(response, request){
     });
 
     //go to next screen
-    fs.readFile('../client/upload.html', function(err, html){
-        if (err) {
-            throw(err);
-        }
+    res.render('index');
+});
 
-        response.writeHead(200, {"Content-Type": "text/html"});
-        response.write(html);
-        response.end();
-        show(response);
-    });
-}
+  // app.get('/show', function(req,res){
+  //   res.writeHead(200, {"Content-Type": "text/plain"});
+  //   fs.createReadStream(FILENAME).pipe(res);
+  // });
+  // function download(pkB, pkA, file) {
 
-function show(response){
-  response.writeHead(200, {"Content-Type": "text/plain"});
-  fs.createReadStream(FILENAME).pipe(response);
-}
 
-exports.start     = start;
-exports.upload    = upload;
-exports.show      = show;
-exports.minCSS    = minCSS;
-exports.minJS     = minJS;
-exports.jquery    = jquery;
-exports.mainCSS   = mainCSS;
-exports.bootstrap = bootstrap;
-exports.woff      = woff;
-exports.ttf       = ttf;
+  // }
+
+};
