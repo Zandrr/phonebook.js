@@ -32,7 +32,7 @@
   ],
   "license": "MIT",
   "scripts": {
-    "start": "node sha/server/index.js",
+    "start": "node clientside/server/server.js",
     "test": "node testall.js"
   },
   "version": "1.0.0",
