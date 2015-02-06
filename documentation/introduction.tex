@@ -134,7 +134,6 @@ understanding of Tor's inner workings, the number of people who contribute back 
 or improving the codebase is much smaller than the number of people merely using the service to protect themselves.
 We find this situation analogous to most P2P networks' leechers-versus-seeders situation, in which those who download
 and then do not actively seed typically outnumber those that download and then seed files to others.
-
 The number of those who run exit nodes (a crucial part of the Tor infrastructure) is smallest of all, due to a history of
 abuse by malicious users and backlash from ISPs. Systems such as TorWard are being developed to assess and reduce the
 risk of ill-meaning traffic to exit node operators and other Tor volunteers, but work in this space is relatively nascent.
@@ -149,9 +148,8 @@ In addition to letting users browse relatively securely,
 Tor offers its users the ability to set up \textit{hidden services}, or alternatives to sites on the open web offering anything
 servable over a SOCKS proxy. While the idea is that operating such a service would be anonymous in that the operator's
 IP address, name, physical location, and other personal details should not be revealed, it has been shown that this isn't
-the most reliable or safe practice.
-
-Hidden services, by way of a \textit{hidden service descriptor}, which consists of the service's public key and a list of its
+the most reliable or safe practice. Hidden services, by way of a \textit{hidden service descriptor},
+which consists of the service's public key and a list of its
 acknowledged introduction points (relays that act essentially like human translators in relaying traffic between site
 accessors and the site itself) can advertise themselves in a globally available directory.
 
@@ -163,10 +161,9 @@ an improved Tor, we believe our system combines its better points with the ease 
 
 Somewhat like Tor in purpose, I2p is an anonymous network based around the \textit{I2p router}. I2p is designed to work
 atop the bespoke UDP and TCP-like protocols SSU and NTCP. These protocols run atop the peer-to-peer network, which itself
-sits on top of IP.
-
-All peer and service metadata is stored in a distributed hash table called \textit{netDB}. Network database records are stored
-in a Kademlia-like DHT \textit{floodfill}. Since netDB is run alongside regular I2p nodes, it may be considered less a trusted
+sits on top of IP. All peer and service metadata is stored in a distributed hash table called
+\textit{netDB}. Network database records are stored in a Kademlia-like DHT \textit{floodfill}.
+Since netDB is run alongside regular I2p nodes, it may be considered less a trusted
 group of authorities than functionally interwoven in the network.
 
 All connections inside I2p's inclusive \textit{darknet} are end-to-end encrypted; the router multiplexes theses connections over
@@ -179,9 +176,8 @@ Additionally, at time of writing the port of the secure distributed Tahoe filesy
 to Freenet on top of I2p is not maintained, and is not up to date with the current version of the filesystem. The largest difference
 between Tahoe and Freenet, according to Tahoe's creators, is that file distribution in Freenet is totally random and that secure
 usage of Tahoe depends on having a large network of friends and family one can shoehorn into also using the system, since Tahoe assumes
-discovery of storage happens out-of-band.
-
-Further, Tahoe makes no attempt to obscure the source or destination of requests. While it is exceedingly difficult to guarantee a
+discovery of storage happens out-of-band. Further, Tahoe makes no attempt to obscure the source or destination of
+requests. While it is exceedingly difficult to guarantee a
 high probability of remaining anonymous against sophisticated attackers, that doesn't mean trying to (and explicitly stating that
 use of the service is at one's own risk) isn't worthwhile.
 
@@ -201,9 +197,48 @@ downloads that may take place before the space in our distributed filesystem ded
 repurposed to hold other information (Freenet uses an LRU caching policy to determine whhat gets deleted when from an individual node
 when there is not enough space).
 
-\subsubsection*{CYRUS} % talk about sangtae's paper
+\subsubsection*{CYRUS} % talk more about sangtae's paper
+
+CYRUS is a secure data-sharing system to be used amongst one's own devices. One of the things most interesting about CYRUS is it relies
+upon the concept of \textit{secret sharing}: that is, a piece of data is broken into chunks and can be reconstructed from any of those
+chunks. We believe this is both highly useful for fault tolerance and incredibly insecure; for now we have chosen to improve on this
+method by encrypting our data before it is chunked and sent into our distributed hash table, but future refining of this idea is highly
+possible.
+
+Another notable feature of CYRUS is its simple, intiuitive, and clean user interface.
+Currently it can only be used on iOS, which we believe is a bit
+of a drawback, but porting to other operating systems and so on is a relatively easy task. We chose (instead of creating a native
+application) to write our clientside interface entirely in Javascript, specifically node.js, so that it can simply be opened locally
+in any browser. While others may disagree with our choice to not host this application ourselves, we believe it is more secure for users
+to simply start the application, point their browser at localhost, and therefore have their data encrypted and chunked before
+it leaves their local machine.
 
 \subsubsection*{BitTorrent} % and kademlia tables
 
+BitTorrent's internal distributed hash table extension, which is based on the Kademlia model and allows for the tracking of peers without
+a standard tracker, initially inspired much of this work, though the BitTorrent routing protocol (and the DHT extension) are far more
+complicated than would suit our needs. Further, trackerless torrent groups often require the disclosure of some identifying
+information to join, are not widely publicised, and are typically used for distribution of material copyrighted by others.
+
+We do not want to employ the idea of ``peers" except between nodes in our DHT: our hash table
+is essentially a multiway peer-to-peer network, tracked by a globally (publicly) available ``peer list" that is updated by each new
+node when it joins the content store. We utilize the idea of ``trackerless torrents" as well to leave less of a paper trail for data
+transfers between nodes, which are designed to firstly ensure no single node knows exactly what it is storing and secondly to keep
+the sum total of the content in the data store balanced across all currently available nodes.
+
+% talk about Kademlia and how it works
+
+% talk more about how BT uses it?
+
 \subsubsection*{Bamboo} %super sweet dht which we are going to use
+
+Bamboo (OpenDHT's distributed hash table) relies on a routing algorithm called Chord-FRT. While we originally planned to implement our
+own distributed hash table and routing algorithm, Chord-FRT did nearly everything we planned to include in our version. Commands include
+GET, PUT, and RM: GET requests a chunk of data to the table, PUT adds data, and an RM request will (eventually) remove a file once the
+node to which the RM was issued comes in contact with a piece of that file.
+
+We chose to organize our chunks of information in each node of the DHT via a key,value data store. We improve upon the security of adding
+items to and removing items from Bamboo by implementing onion routing from the client to an item's eventual resting place: each ``hop",
+from the client to the edge node it has made initial contact with, and from that edge node through the DHT, negotiates its own session keys
+and removes a layer of the ``onion" from the data chunk as the chunk is passed through. We will speak more in detail to this later.
 
