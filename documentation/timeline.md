@@ -22,7 +22,8 @@ Alex
   - Amazon SDK vs API
   - only passing keys serverside
   - OpenID?
-Kelly: 
+
+Kelly
   - Bamboo to js
   - add encryption for hopping 
   - try a node or two on Planet Lab and get them communicating with each other
