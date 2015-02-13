@@ -1,52 +1,32 @@
 Sketch of Paper No. 1
 =====================
 
-What?
-----
+Problem Statement
+-----------------
 
-Tor has some design decisions we are questioning and would like to explore alternatives for.
+Anonymous asynchronous transfer of information, particularly large files, is currently quite difficult.
 
-Particularly:
+Services that currently do something like what we want to do:
+-------------------------------------------------------------
+  - GNUnet
+  - Freenet
+  - Tor
+  - i2p
+  - BitTorrent sync and/or trackerless torrents
 
-* no storage on nodes
-* allowing people to choose whether or not to be an exit node (allows some parties to take all the blame for abuse)
-* no incentive whatsoever to contribute back: classic seeders versus leechers problem (around since the early days of p2p and "private" information sharing)
-* if you have a relay or an exit node, unless you basically set up your own ISP, some ISPs such as Comcast can and will throttle the shit out of you once they figure out what is sitting under your dining room table
-* while people can contribute to the codebase, how is relay/node/guard software centrally monitored to make sure it conforms and no extra-sneaky stuff is also installed?
-* what if we want to send big files without using sketchy upload sites or magnets?! what do? torrenting over tor is a big fat no due to a protocol mismatch at the transport layer: tor hides TCP traffic, but torrenting relies on a UDP tracker to work properly (or you can join a select trackerless torrenting group, but this usually means disclosing some info about yourself in order to join...)
-* what about i2p? freenode? they made some better design decisions that we would like to try out in a more torlike environ.
+Ideas we like
+-------------
+  - 3rd generation onion routing
+  - virtual private storage with operators' identities safeguarded with OAUTH
+  - encryption of all data before it enters the network
+  - randomized load balancing and some sort of on-demand load balancing
+  - Byzantine fault and failure resistance
+  - making something that even people with little technical know-how can set up (but not pandering to them -- provide technical specs and make it possible for people to contribute to the back end by hosting everything on Github)
+  - p2p network for asynchronous data storage
+  - information-centric networking
+  - distributed fast data storage via a DHT (specifically, Bamboo / OpenDHT)
+  - phantom.js script for "checkups" on all nodes in our data-storage table
 
-Why do we care?
----------------
-
-In coding and testing to support this exploration, we hope to create a more efficient, user-friendly system for private information sharing and transfer.
-
-What does that even mean? Details.
-----------------------------------
-
-It is a pain in the ass to set up hidden services. One of our goals is to create a hidden-service-rendezvous-like (phew!) data sharing mechanism that is compatible with Mac, Windows, and whatever Nixes and other OSes can run modern browsers.
-
-We hope to make this service dependent on *user contributions*, that is, if you do not set up your own node, you do not have the privilege of using the nodes other people have added to the service.
-
-We want to have the software for these nodes (and the client application) peer reviewed -- the FOSS philosophy says, to paraphrase, more eyes means more chances to catch bugs and funny stuff. We want a standard versioning system for our nodes such that there is minimal data loss due to software errors.
-
-Data will be stored in a DHT (OpenDHT?) and indexed by an also distributed key-value store. Nodes will be indexed by a master list shared with your contribution node when you join the network.
-
-What will the user experience be like?
---------------------------------------
-
-We want the user experience to be as simple and foolproof as possible. We want to build in security from the start, not slap it on like really ugly icing at the end. You should not have to learn tor and basically all of networking to be able to set up a hidden-service-like info drop that protects both your privacy and the info recipient.
-
-While contribution via node setup is required for using the service, this sort of contribution may be made at low risk to you. You sign up for VPS space on one of the services we are compatible with (EC2? Digital Ocean? cheapass VPS? Azure? Box?) and log in. You do a `git clone` on our node software repo and get the latest version of our DHT node software. You do a `make` (slash run a script) and automagically the Make fairy sets everything up for you.You may periodically have to log back in to pull down updates and set them up, but we will try to keep it as simple and doable as possible. In order to transfer files, you simply start the clientside (browser) app and follow the simple instructions to encrypt and send your data.
-
-Why should anybody trust you people?
-------------------------------------
-
-For one, we do not save your credentials or any information about you other than the identifying information of your node. When your data is transferred into the DHT, a tor-style circuit is built -- your client app chooses the final destination for the data randomly from the publicly available list of nodes, as well as a start point. The encrypted data is wrapped up onion-style and sent to the first node, which has no knowledge of either the endpoint of the data, what the data is (it is encrypted), or whether you are even sending or receiving -- just that a connection has been made from you to it. A fresh set of session keys shall be negotiated for each subsequent hop, meaning that the n-1th node (nth is destination) has no idea who you are or what it is sending, but knows the identifying info for the nth node.
-
-Basically, we are trying to not fuck people over. We do not want your personal information. We do not want your statistics. We do not want your likes, your data, your credentials of any kind, your credit card numbers, or even your real name. You should be able to keep all that private if you choose.
-
-Is this illegal?
-----------------
-
-We hope not. A thorough exploration of the U.S./Canada/EU law in this sort of situation will be (hopefully) complete before this project is widely publicised.
+Sketch of our solution
+----------------------
+We want an asynchronous p2p network based in the cloud. Ideally, instances would be located in different layer 2 networks / ASes (begs the question: what is happening with the migration of Tor volunteer contribs to the cloud?). Each user of our service must contribute a node in order to obtain the 'public' list of all nodes in the table, which allows for using the service. One must know where the nodes are in order to add data to them. We want to protect user data and user identities by using third-generation onion routing between the user's machine and their data's resting place in the DHT. We want to use OAUTH to coordinate user identities and credentials, and make it possible for this service to be administered asynchronously as well: each user is RESPONSIBLE for pulling down the latest node version (based on our simple instructions). Each user keeps control over their credentials and does not share them. Key sharing for encryption and decryption of data on entry/exit from the DHT may also be organized via OAUTH. We want data to be available within reasonable time, but ONLY to those who are on that particular datum's destination list. We want to take advantage of modern technology and not reinvent the wheel, hence using OAUTH, Bamboo, and nodejs. We want to make this service simple to use, contribute to (either by running a node or adding to the codebase by submitting a pull request), and administer. We want to not have to do a lot of work to keep the DHT going, nor should users have to do a lot of work to keep their nodes going. We want NO credentials to at ANY TIME be shared or distributed (unless we decide on having people who keep lists of credentials, but this seems as if it would be unhelpful at present). 
