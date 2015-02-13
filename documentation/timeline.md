@@ -1,16 +1,52 @@
 Project Timeline: Spring 2015
 =============================
 
-Timeline for completion of things before publication will go here
+Choice of venue for publication: NDSS 2016
+  - submission deadlines in early August 2015  
+  - categor(ies): Privacy, Social Networks and Cloud Services
 
-USENIX SECURITY DEADLINES
-------------------------
+Ideally:
+  - coding done (all testing too) by mid to end of May
+  - paper first (good) draft mid June
+  - paper final draft 1 July, submit early
 
-1. titles and abstracts due Monday Feb 16, 9 PM EST
-2. submissions due Monday Feb 23, 9 PM EST
-3. final papers due Tuesday June 30, 9 PM EDT
+Due Dates (barring serious bugs/challenges/setbacks)
+====================================================
 
-CODING DEADLINES
-----------------
-tbd
+We plan to operate in roughly two-week sprints in order to maximize our chances of finishing all building and (most) testing by semester end to end of May.
+
+27 February
+-----------
+Alex 
+  - OAUTH: v1 vs v2
+  - Amazon SDK vs API
+  - only passing keys serverside
+  - OpenID?
+Kelly: 
+  - Bamboo to js
+  - add encryption for hopping 
+  - try a node or two on Planet Lab and get them communicating with each other
+
+13 March
+--------
+"Checker" oracle
+
+27 March
+--------
+how to set up a node
+  - documentation  
+  - installer
+
+10 April
+--------
+make the front end look nice + front end testing
+
+24 April
+--------
+start testing / stats / graphs and charts for paper
+
+8th (ish... finals week, so maybe week after)
+---------------------------------------------
+hopefully testing completely finished, major bugs caught, paper draft
+
 
