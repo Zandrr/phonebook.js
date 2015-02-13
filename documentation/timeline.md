@@ -3,12 +3,13 @@ Project Timeline: Spring 2015
 
 Timeline for completion of things before publication will go here
 
-USENIX SECURITY DEADLINES
-------------------------
+NDSS DEADLINES
+--------------
 
-1. titles and abstracts due Monday Feb 16, 9 PM EST
-2. submissions due Monday Feb 23, 9 PM EST
-3. final papers due Tuesday June 30, 9 PM EDT
+1. titles and abstracts due Monday 5 August 11:59 PM EDT (firm)
+2. submissions due Friday 9 August 11:59 PM EDIT (firm)
+3. author notification Friday 1 November
+4. final versions due Friday 6 December (firm)
 
 CODING DEADLINES
 ----------------

@@ -5,47 +5,57 @@ distributed filesharing domains from which we have taken inspiration.
 
 \subsubsection*{Why Johnny can't stay anonymous}
 
-Johnny can't encrypt if the secure applications available to him are non-intuitive and difficult for
+Johnny can't encrypt if the secure applications available are non-intuitive and difficult for
 less technical users to properly employ. Whitten et al discovered by way of lab trials that PGP's
 user interface was difficult to use and understand even for people with some technical background,
 at time of publication.
 
-While the field of user experience has since made huge progress and is one of the foremost design
-concerns in application architecture, usability is still less frequently considered when applications,
-tools, and frameworks for security and privacy are developed. If Johnny has information he needs
-to get to Alice without those with a lot of computing power at their disposal virtually reading over
-his shoulder, he should not need to become an expert in low-level topics in order to properly configure
-and utilize such services as will let him encrypt, sign, send, and receive data with zero interference
+While user experience overall has made much progress and is one of the foremost design
+concerns in building `everyday' applications, usability is still less frequently considered when applications,
+tools, and frameworks are developed with user privacy and security as immediate concerns. If Johnny has information he needs
+to get to Alice without people with a lot of computing power reading over
+his shoulder, he should not need to become an expert in systems-level security to do so. Anyone ought to be able to properly configure
+privacy-providing services and encrypt, sign, send, and receive data with no possibility of interference
 by any third parties (including the service provider) and little fuss.
 
-Suppose Johnny is a journalist, activist, or really anyone with low technical expertise who might be working
+Suppose Johnny is a journalist, activist, or anyone with little technical expertise who might be working
 somewhere with business practices on the shady side that are actively hurting people.
 If services such as anonymous filesharing are difficult to understand and use, Johnny might not be able to get the
-word out. He might even be detained or arrested if visible use of such services is against local law. We
-propose creating a simple client-facing application and making its source available for public, version-controlled
-contribution in order to ensure such a service remains freely available.
+word out. He might even be laid off, detained, or arrested if visible use of such
+services is against local law or company policy. We
+propose creating a simple client-facing application and making
+its source code available for public, version-controlled
+contribution on Github.
 
 \subsubsection*{Tor and the onion protocol}
 
 Tor is a widely used, well-documented project claiming to provide more security than its users would have openly
 conducting business. The Tor FAQ states that peer-to-peer filesharing is not desired (or to be a focus of operation)
 within the Tor network. Data such as IP addresses sent over UDP-based P2P protocols are not anonymized by Tor or
-SOCKS proxies in general.
+SOCKS proxies in general. Though some thought in recent years has been given to including UDP support in Tor both
+to improve latency issues and to allow for the inclusion of UDP-based data transport methods, to
+our knowledge the Tor developers have not started serious work on or released such an improvement to the network.
 
 Further, due (we hypothesize) to Tor's notoriety in mainstream media and additionally the general public's lack of
 understanding of Tor's inner workings, the number of people who contribute back by running nodes
 or improving the codebase is much smaller than the number of people merely using the service to protect themselves.
 We find this situation analogous to most P2P networks' leechers-versus-seeders situation, in which those who download
 and then do not actively seed typically outnumber those that download and then seed files to others.
-The number of those who run exit nodes (a crucial part of the Tor infrastructure) is smallest of all, due to a history of
-abuse by malicious users and backlash from ISPs. Systems such as TorWard are being developed to assess and reduce the
-risk of ill-meaning traffic to exit node operators and other Tor volunteers, but work in this space is relatively nascent.
+While the value of Tor does increase with the number of users to provide `cover' to one's
+own traffic, the network itself still remains small in proportion to the number of users.
+The number of those who run exit nodes (a crucial part of the Tor infrastructure) is smallest of all subsets of Tor
+volunteers, likely due to a history of abuse by malicious users and backlash from ISPs.
+Systems such as TorWard are being developed to assess and reduce the
+risk of ill-meaning traffic to exit node operators and other Tor
+volunteers, but work in this space is relatively nascent.
 
-Tor uses an incremental path-building design: each successive hop in a \textit{circuit}, which is a path between a user's entry
+Tor uses an incremental path-building design to connect Alice to Bob:
+each successive hop in a \textit{circuit}, which is a path between a user's entry
 point and her destination, negotiates its own session keys to provide each acting node in a circuit a sort of plausible
 deniability. In our own design, transport of a given chunk of data from
-the user to the DHT node which her client has chosen as that chunk's eventual destination is modelled closely
-after these circuits.
+the user to the chosen destination is modelled closely
+after these circuits. With Tor, both endpoints must be synchronized for connection to occur, where in our design, data transport
+is effectively \textit{asynchronous}: data will only be received when a request is sent for it.
 
 In addition to letting users browse relatively securely,
 Tor offers its users the ability to set up \textit{hidden services}, or alternatives to sites on the open web offering anything
