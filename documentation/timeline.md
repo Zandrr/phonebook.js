@@ -10,7 +10,7 @@ Ideally:
   - paper first (good) draft mid June
   - paper final draft 1 July, submit early
 
-Due Dates (barring serious bugs/challenges/setbacks)
+Due Dates (barring serious bugs/setbacks)
 ====================================================
 
 We plan to operate in roughly two-week sprints in order to maximize our chances of finishing all building and (most) testing by semester end to end of May.
