@@ -11,10 +11,10 @@ import bamboo.api.BambooAddToLocationCache;
 import bamboo.api.BambooLeafSetChanged;
 import bamboo.api.BambooNeighborInfo;
 import bamboo.api.BambooReverseRoutingTableChanged;
-import bamboo.api.BambooRouteContinue;
-import bamboo.api.BambooRouteDeliver;
-import bamboo.api.BambooRouteInit;
-import bamboo.api.BambooRouteUpcall;
+import bamboo.api.BambooRouteContinue; //note
+import bamboo.api.BambooRouteDeliver; //note
+import bamboo.api.BambooRouteInit; //note
+import bamboo.api.BambooRouteUpcall; //note
 import bamboo.api.BambooRouterAppRegReq;
 import bamboo.api.BambooRouterAppRegResp;
 import bamboo.api.BambooRoutingTableChanged;
@@ -67,7 +67,7 @@ import static bamboo.util.Curry.*;
 public class Router extends StandardStage
 implements SingleThreadedEventHandlerIF {
 
-    protected static Map<NodeId,Router> instances = 
+    protected static Map<NodeId,Router> instances =
         new LinkedHashMap<NodeId,Router>();
 
     /**
@@ -78,7 +78,7 @@ implements SingleThreadedEventHandlerIF {
     }
 
     /**
-     * Computes an app_id based on the class name for convenience.  
+     * Computes an app_id based on the class name for convenience.
      */
     public static final long app_id (Class clazz) {
         return ostore.util.ByteUtils.bytesToLong (
@@ -97,23 +97,23 @@ implements SingleThreadedEventHandlerIF {
 
         Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]> leafSetChanged;
         Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]> routingTableChanged;
-        Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]> 
+        Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]>
             reverseRoutingTableChanged;
-        Thunk6<BigInteger,BigInteger,NodeId,Long,Long,QuickSerializable> 
+        Thunk6<BigInteger,BigInteger,NodeId,Long,Long,QuickSerializable>
             routeUpcall;
-        Thunk6<BigInteger,BigInteger,NodeId,Long,Long,QuickSerializable> 
+        Thunk6<BigInteger,BigInteger,NodeId,Long,Long,QuickSerializable>
             routeDeliver;
 
         ApplicationInfo(
-               Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]> 
+               Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]>
                leafSetChanged,
-               Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]> 
+               Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]>
                routingTableChanged,
-               Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]> 
+               Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]>
                reverseRoutingTableChanged,
-               Thunk6<BigInteger,BigInteger,NodeId,Long,Long,QuickSerializable> 
+               Thunk6<BigInteger,BigInteger,NodeId,Long,Long,QuickSerializable>
                routeUpcall,
-               Thunk6<BigInteger,BigInteger,NodeId,Long,Long,QuickSerializable> 
+               Thunk6<BigInteger,BigInteger,NodeId,Long,Long,QuickSerializable>
                routeDeliver) {
             this.leafSetChanged = leafSetChanged;
             this.routingTableChanged = routingTableChanged;
@@ -123,7 +123,7 @@ implements SingleThreadedEventHandlerIF {
         }
     }
 
-    protected Map<Long,ApplicationInfo> apps = 
+    protected Map<Long,ApplicationInfo> apps =
         new LinkedHashMap<Long,ApplicationInfo>();
 
     /**
@@ -136,7 +136,7 @@ implements SingleThreadedEventHandlerIF {
 
     /**
      * Register an application (such as bamboo.dht.Dht) to use the Router.
-     * 
+     *
      * @param id A value to identify this application in route messages sent
      * across the network.
      *
@@ -171,19 +171,19 @@ implements SingleThreadedEventHandlerIF {
      */
     public void registerApplication(long id,
             Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]> leafSetChanged,
-            Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]> 
+            Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]>
             routingTableChanged,
-            Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]> 
+            Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]>
             reverseRoutingTableChanged,
             Thunk6<BigInteger,BigInteger,NodeId,Long,Long,QuickSerializable>
             routeUpcall,
             Thunk6<BigInteger,BigInteger,NodeId,Long,Long,QuickSerializable>
-            routeDeliver) 
+            routeDeliver)
             throws DuplicateApplicationException {
         if (apps.containsKey(new Long(id)))
             throw new DuplicateApplicationException("duplicate id " + id);
-        apps.put(new Long(id), new ApplicationInfo(leafSetChanged, 
-                    routingTableChanged, reverseRoutingTableChanged, 
+        apps.put(new Long(id), new ApplicationInfo(leafSetChanged,
+                    routingTableChanged, reverseRoutingTableChanged,
                     routeUpcall, routeDeliver));
     }
 
@@ -222,15 +222,16 @@ implements SingleThreadedEventHandlerIF {
      * <code>registerApplication</code> will be called once the message
      * reaches the node responsible for <code>dest</code>.
      */
-    public void routeInit(final BigInteger dest, final long applicationID, 
+    public void routeInit(final BigInteger dest, final long applicationID,
             final boolean intermediateUpcall, final QuickSerializable payload) {
 
         if (! apps.containsKey(new Long(applicationID))) {
-            logger.error("routeInit called with unknown application ID " 
+            logger.error("routeInit called with unknown application ID "
                          + applicationID);
             System.exit(1);
         }
 
+        //note
         NeighborInfo next_hop = calc_next_hop (dest, true);
         if (next_hop == my_neighbor_info) {
             deliver(my_guid, dest, my_node_id, applicationID, 1,
@@ -242,9 +243,9 @@ implements SingleThreadedEventHandlerIF {
                     my_guid, payload);
             outb.comp_q = my_sink;
             outb.user_data = new RecursiveRouteCB (next_hop, new Runnable() {
-                    public void run() { 
-                        routeInit(dest, applicationID, 
-                                  intermediateUpcall, payload); 
+                    public void run() {
+                        routeInit(dest, applicationID,
+                                  intermediateUpcall, payload);
                         }
                     });
             if (no_rexmit_routes)
@@ -259,13 +260,14 @@ implements SingleThreadedEventHandlerIF {
      * Coninue a routing operation after an upcall.  See the comments for
      * {@link #routeInit} for more information.
      */
-    public void routeContinue(final BigInteger src, final BigInteger dest, 
-                final NodeId immediateSource, final long applicationID, 
-                final boolean intermediateUpcall, 
+    //note
+    public void routeContinue(final BigInteger src, final BigInteger dest,
+                final NodeId immediateSource, final long applicationID,
+                final boolean intermediateUpcall,
                 final QuickSerializable payload) {
 
         if (! apps.containsKey(new Long(applicationID))) {
-            logger.error("routeContinue called with unknown application ID " 
+            logger.error("routeContinue called with unknown application ID "
                     + applicationID);
             System.exit(1);
         }
@@ -281,10 +283,10 @@ implements SingleThreadedEventHandlerIF {
 		    my_guid, payload);
             outb.comp_q = my_sink;
             outb.user_data = new RecursiveRouteCB (next_hop, new Runnable() {
-                    public void run() { 
-                        routeContinue(src, dest, immediateSource, 
-                                      applicationID, intermediateUpcall, 
-                                      payload); 
+                    public void run() {
+                        routeContinue(src, dest, immediateSource,
+                                      applicationID, intermediateUpcall,
+                                      payload);
                         }
                     });
             if (no_rexmit_routes)
@@ -337,14 +339,14 @@ implements SingleThreadedEventHandlerIF {
     protected boolean ignore_possibly_down;
     protected boolean no_rexmit_routes;
 
-    protected Map<NeighborInfo,Double> latency_map = 
+    protected Map<NeighborInfo,Double> latency_map =
         new LinkedHashMap<NeighborInfo,Double>();
 
-    protected Map<NeighborInfo,Long> possibly_down = 
+    protected Map<NeighborInfo,Long> possibly_down =
         new LinkedHashMap<NeighborInfo,Long>();
-    protected Map<NodeId,NeighborInfo> possibly_down_helper = 
+    protected Map<NodeId,NeighborInfo> possibly_down_helper =
         new LinkedHashMap<NodeId,NeighborInfo>();
-    
+
     public Set<NeighborInfo> possiblyDown() {
         return possibly_down.keySet();
     }
@@ -402,11 +404,11 @@ implements SingleThreadedEventHandlerIF {
         // send, so it needs to be more efficient.  So we use the
         // possibly_down_helper map to go from NodeId to NeighborInfo quickly.
         NeighborInfo ni = possibly_down_helper.get(n);
-        if (ni != null) 
+        if (ni != null)
             removeFromPossiblyDown(ni);
     }
 
-    protected Set<NeighborInfo> periodic_pings = 
+    protected Set<NeighborInfo> periodic_pings =
         new LinkedHashSet<NeighborInfo>();
 
     protected BigInteger my_guid;
@@ -414,7 +416,7 @@ implements SingleThreadedEventHandlerIF {
     protected NeighborInfo my_neighbor_info;
 
     protected boolean initialized;
-    protected LinkedList<QueueElementIF> waitq = 
+    protected LinkedList<QueueElementIF> waitq =
         new LinkedList<QueueElementIF>();
 
     protected LocationCache location_cache;
@@ -463,8 +465,8 @@ implements SingleThreadedEventHandlerIF {
     public Router () throws Exception {
 
         // Application ID 0 is reserved for the router's use.
-        registerApplication(0, null, null, null, null, null); 
-                
+        registerApplication(0, null, null, null, null, null);
+
 	ostore.util.TypeTable.register_type (LookupReqPayload.class);
 	ostore.util.TypeTable.register_type (NeighborInfo.class);
         ostore.util.TypeTable.register_type(CoordReq.class);
@@ -608,7 +610,7 @@ implements SingleThreadedEventHandlerIF {
             my_guid = new BigInteger (explicit_guid.substring (2), 16);
         }
 	else {
-	    SecureHash my_guid_sh = new SHA1Hash (my_node_id);
+	    SecureHash my_guid_sh = new SHA1Hash (my_node_id); //note: do we want to change to a different hash?
             my_guid = GuidTools.secure_hash_to_big_integer (my_guid_sh);
 	}
 
@@ -675,6 +677,9 @@ implements SingleThreadedEventHandlerIF {
         // down_nodes set and join immediately (through ourselves).  This hack
         // allows all PlanetLab nodes to have the same set of 10 or so
         // gateways and to be started in any order.
+        // note: we'll NEED to remove this in the version released off PlanetLab
+        // such that the checker is the final authority in allowing a node to be indexed
+        // in other nodes' routing tables
 
         immediate_join = config_get_boolean (config, "immediate_join");
         if (immediate_join) {
@@ -804,11 +809,11 @@ implements SingleThreadedEventHandlerIF {
         public RecursiveRouteCB (NeighborInfo n, Runnable r) {
             ni = n; retry = r;
         }
-        public void success () { 
-            generic_msg_success (ni); 
+        public void success () {
+            generic_msg_success (ni);
         }
-        public void failure () { 
-            generic_msg_failure (ni, retry); 
+        public void failure () {
+            generic_msg_failure (ni, retry);
         }
         public String toString () {
             return "(RecursiveRouteCB " + ni + " " + retry + ")";
@@ -864,7 +869,7 @@ implements SingleThreadedEventHandlerIF {
     }
 
     protected void generic_msg_failure (NeighborInfo ni, Runnable retry) {
-        if (logger.isDebugEnabled ()) 
+        if (logger.isDebugEnabled ())
             logger.debug ("failed on message send to " + ni + ".");
 
         // Immediately take the node of the location cache.
@@ -1041,57 +1046,57 @@ implements SingleThreadedEventHandlerIF {
         final SinkIF sink = req.completion_queue;
         final long applicationID = req.app_id;
 
-        final Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]> lsct = 
-            !req.send_leaf_sets ? null : 
+        final Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]> lsct =
+            !req.send_leaf_sets ? null :
             new Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]>() {
-                public void run(BambooNeighborInfo preds[], 
+                public void run(BambooNeighborInfo preds[],
                         BambooNeighborInfo succs[]) {
-                    application_enqueue(sink, 
+                    application_enqueue(sink,
                             new BambooLeafSetChanged(preds, succs));
                 }
             };
 
-        final Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]> rtct = 
+        final Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]> rtct =
             !req.send_rt ? null :
             new Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]>() {
                 public void run(BambooNeighborInfo added[],
                                 BambooNeighborInfo removed[]) {
-                    application_enqueue(sink, 
+                    application_enqueue(sink,
                             new BambooRoutingTableChanged (added, removed));
                 }
             };
 
-        final Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]> rrtct = 
+        final Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]> rrtct =
             !req.send_reverse_rt ? null :
             new Thunk2<BambooNeighborInfo[],BambooNeighborInfo[]>() {
                 public void run(BambooNeighborInfo added[],
                                 BambooNeighborInfo removed[]) {
-                    application_enqueue(sink, 
+                    application_enqueue(sink,
                         new BambooReverseRoutingTableChanged(added, removed));
                 }
             };
 
-        Thunk6<BigInteger,BigInteger,NodeId,Long,Long,QuickSerializable> rut = 
+        Thunk6<BigInteger,BigInteger,NodeId,Long,Long,QuickSerializable> rut =
         new Thunk6<BigInteger,BigInteger,NodeId,Long,Long,QuickSerializable>() {
-            public void run(BigInteger src, BigInteger dest, 
-                            NodeId immediateSource, Long waitMillis, 
+            public void run(BigInteger src, BigInteger dest,
+                            NodeId immediateSource, Long waitMillis,
                             Long estRTTMillis, QuickSerializable payload) {
 		application_enqueue(sink, new BambooRouteUpcall(
                             src, dest, immediateSource, applicationID,
                             false /* not iterative */, 0 /* tries */,
-                            waitMillis.longValue(), 
+                            waitMillis.longValue(),
                             estRTTMillis.longValue(), payload));
             }
         };
 
-        Thunk6<BigInteger,BigInteger,NodeId,Long,Long,QuickSerializable> rdt = 
+        Thunk6<BigInteger,BigInteger,NodeId,Long,Long,QuickSerializable> rdt =
         new Thunk6<BigInteger,BigInteger,NodeId,Long,Long,QuickSerializable>() {
-            public void run(BigInteger src, BigInteger dest, 
-                            NodeId immediateSource, Long waitMillis, 
+            public void run(BigInteger src, BigInteger dest,
+                            NodeId immediateSource, Long waitMillis,
                             Long estRTTMillis, QuickSerializable payload) {
 		application_enqueue(sink, new BambooRouteDeliver (
                             src, dest, immediateSource, applicationID,
-                            0 /* tries */, waitMillis.longValue(), 
+                            0 /* tries */, waitMillis.longValue(),
                             estRTTMillis.longValue(), payload));
             }
         };
@@ -1160,6 +1165,7 @@ implements SingleThreadedEventHandlerIF {
 	}
     }
 
+    //note
     protected void deliver (BigInteger src, BigInteger dest, NodeId is,
 	    long app_id, int tries, long wait_ms, long est_rtt_ms,
             QuickSerializable payload) {
@@ -1190,6 +1196,7 @@ implements SingleThreadedEventHandlerIF {
         }
     }
 
+    //note
     protected void handle_route_continue (BambooRouteContinue req) {
 	if (req.iter) {
             BUG("iterative routing no longer supported");
@@ -1201,9 +1208,10 @@ implements SingleThreadedEventHandlerIF {
     protected void handle_route_init (BambooRouteInit req) {
 	if (req.iter)
             BUG("iterative routing no longer supported");
-        routeInit(req.dest, req.app_id, req.intermediate_upcall, req.payload);
+        routeInit(req.dest, req.app_id, req.intermediate_upcall, req.payload); //note
     }
 
+    //note
     protected void handle_route_msg (final RouteMsg req) {
         NeighborInfo peer_ni = new NeighborInfo (req.peer, req.peer_guid);
         location_cache.add_node (peer_ni);
@@ -1215,10 +1223,10 @@ implements SingleThreadedEventHandlerIF {
 	}
 	else {
 	    ApplicationInfo appInfo = apps.get(new Long(req.app_id));
-	    if (req.intermediate_upcall && (appInfo != null) 
+	    if (req.intermediate_upcall && (appInfo != null)
                     && (appInfo.routeUpcall != null)) {
-                appInfo.routeUpcall.run(req.src, req.dest, req.peer, 
-                                        new Long(req.wait_ms), 
+                appInfo.routeUpcall.run(req.src, req.dest, req.peer,
+                                        new Long(req.wait_ms),
                                         new Long(req.est_rtt_ms), req.payload);
 	    }
 	    else {
@@ -1237,7 +1245,7 @@ implements SingleThreadedEventHandlerIF {
 			req.src, req.dest, req.app_id, req.intermediate_upcall,
 			my_guid, req.payload);
                 outb.comp_q = my_sink;
-                outb.user_data = new RecursiveRouteCB (next_hop, 
+                outb.user_data = new RecursiveRouteCB (next_hop,
                     new Runnable() { public void run() { handleEvent(req); }});
                 if (no_rexmit_routes)
                     outb.timeout_sec = -1;
@@ -1274,7 +1282,7 @@ implements SingleThreadedEventHandlerIF {
         }
 
         if (near_rt_alarm_period != 0) {
-            acore.registerTimer(randomPeriod(near_rt_alarm_period), 
+            acore.registerTimer(randomPeriod(near_rt_alarm_period),
                                 nearRoutingTableAlarm);
         }
 
@@ -1310,19 +1318,19 @@ implements SingleThreadedEventHandlerIF {
                 gateways.addLast (gateway);
                 logger.info ("Trying to join through gateway " + gateway);
                 dispatch (new JoinReq (gateway, my_node_id, my_guid, 0));
-                acore.registerTimer(randomPeriod(10*1000), 
-                        curry(joinAlarm, new Integer(0), 
+                acore.registerTimer(randomPeriod(10*1000),
+                        curry(joinAlarm, new Integer(0),
                             new Integer(10*1000), // 10 seconds for starters
                             new Integer(0)));
-            } 
+            }
             acore.registerTimer(randomPeriod(periodic_ping_period), pingAlarm);
             acore.registerTimer(randomPeriod(COORD_CHECK), expireCoordsAlarm);
-            acore.registerTimer(randomPeriod(send_coord_period), 
+            acore.registerTimer(randomPeriod(send_coord_period),
                                 sendCoordsAlarm);
         }
     };
 
-    protected int weighted_random_rt_level () {
+    protected int weighted_random_rt_level () { //note: we'll need to change this up to add some randomization
         // Prefer nodes in lower (closer) levels of the routing table.
         // Say there are nodes in three levels of our routing table.  Then we
         // will pick level 0 with probability 3/x, level 1 with probability
@@ -1514,12 +1522,13 @@ implements SingleThreadedEventHandlerIF {
         PendingLookupInfo pl = pending_lookups.remove(resp.lookup_id);
         if (pl != null) {
             for (Pair<LookupCb,Object> pair : pl.cbs) {
-                pair.first.lookup_cb(resp.lookup_id, resp.owner_id, 
+                pair.first.lookup_cb(resp.lookup_id, resp.owner_id,
                                      resp.peer, pair.second);
             }
         }
     }
 
+    //note
     protected void handle_routing_table_req (RoutingTableReq req) {
 	if (req.level >= GUID_DIGITS) {
             if (logger.isDebugEnabled ())
@@ -1590,7 +1599,7 @@ implements SingleThreadedEventHandlerIF {
                         logger.debug (ni + " is in my RT.");
                 }
                 else {
-                    if (new_nodes == null) 
+                    if (new_nodes == null)
                         new_nodes = new LinkedList<NeighborInfo>();
                     new_nodes.addLast (ni);
                 }
@@ -1634,7 +1643,7 @@ implements SingleThreadedEventHandlerIF {
                 // check:
 
                 if ((! pastry_mode) && (! ni.node_id.equals (resp.peer))) {
-                    LinkedList<NeighborInfo> only_me = 
+                    LinkedList<NeighborInfo> only_me =
                         new LinkedList<NeighborInfo>();
                     only_me.addLast (my_neighbor_info);
                     RoutingTableResp outb =
@@ -1646,10 +1655,10 @@ implements SingleThreadedEventHandlerIF {
         }
     }
 
-    protected void notify_routing_table_changed (
+    protected void notify_routing_table_changed ( //note: how do we verify this?
 	BambooNeighborInfo [] added, BambooNeighborInfo [] removed) {
         for (ApplicationInfo appInfo : apps.values()) {
-            if (appInfo.routingTableChanged != null) 
+            if (appInfo.routingTableChanged != null)
                 appInfo.routingTableChanged.run(added, removed);
         }
     }
@@ -1657,7 +1666,7 @@ implements SingleThreadedEventHandlerIF {
     protected void notify_reverse_routing_table_changed (
 	    BambooNeighborInfo [] added, BambooNeighborInfo [] removed) {
         for (ApplicationInfo appInfo : apps.values()) {
-            if (appInfo.reverseRoutingTableChanged != null) 
+            if (appInfo.reverseRoutingTableChanged != null)
                 appInfo.reverseRoutingTableChanged.run(added, removed);
         }
     }
@@ -1682,13 +1691,13 @@ implements SingleThreadedEventHandlerIF {
 		return;
 	    }
 	}
-		
+
         BambooNeighborInfo preds[] = leaf_set.preds ();
         BambooNeighborInfo succs[] = leaf_set.succs ();
 
         if (onlyThisOne == null) {
             for (ApplicationInfo appInfo : apps.values()) {
-                if (appInfo.leafSetChanged != null) 
+                if (appInfo.leafSetChanged != null)
                     appInfo.leafSetChanged.run(preds, succs);
             }
         }
@@ -1697,13 +1706,13 @@ implements SingleThreadedEventHandlerIF {
         }
     }
 
-    protected Thunk3<Integer,Integer,Integer> joinAlarm = 
+    protected Thunk3<Integer,Integer,Integer> joinAlarm =
             new Thunk3<Integer,Integer,Integer>() {
         public void run(Integer tries, Integer period, Integer revTTL) {
             if (! initialized) {
                 tries = new Integer(tries.intValue() + 1);
                 revTTL = new Integer(revTTL.intValue() + 1);
-                period = new Integer(period.intValue() >= 30*1000 
+                period = new Integer(period.intValue() >= 30*1000
                                      ? 60*1000 : period.intValue() * 2);
                 int divisor = Math.max (3, gateways.size ());
                 NodeId gateway = gateways.removeFirst ();
@@ -1711,7 +1720,7 @@ implements SingleThreadedEventHandlerIF {
                 logger.info ("Join try " + tries +
                         " timed out.  Gateway=" + gateway + ".  Trying again " +
                         " with rev_ttl=" + revTTL.intValue()/divisor);
-                dispatch (new JoinReq (gateway, my_node_id, my_guid, 
+                dispatch (new JoinReq (gateway, my_node_id, my_guid,
                                        revTTL.intValue()/divisor));
                 acore.registerTimer(randomPeriod(period.intValue()),
                                     curry(this, tries, period, revTTL));
@@ -1720,7 +1729,7 @@ implements SingleThreadedEventHandlerIF {
     };
 
     protected void handle_join_req (JoinReq req) {
-
+        //note
         // Check for routing loops, and if one is found, just drop the
         // message.  Either the network will heal, or the rev_ttl will be
         // increased by the joining node until the loop is avoided.
@@ -1752,7 +1761,7 @@ implements SingleThreadedEventHandlerIF {
 	    // We're the root.  Send a response.
 
 	    LinkedList<NeighborInfo> path = new LinkedList<NeighborInfo>();
-            for (NeighborInfo n : req.path) 
+            for (NeighborInfo n : req.path)
                 path.addLast(n);
 	    path.addLast (my_neighbor_info);
 
@@ -1775,7 +1784,7 @@ implements SingleThreadedEventHandlerIF {
 	    req.peer = next_hop.node_id;
 	    req.inbound = false;
             req.comp_q = my_sink;
-            req.user_data = new RecursiveRouteCB (next_hop, 
+            req.user_data = new RecursiveRouteCB (next_hop,
                     new Runnable() { public void run() { handleEvent(orig); }});
             req.timeout_sec = 5;
 	    dispatch (req);
@@ -1783,7 +1792,7 @@ implements SingleThreadedEventHandlerIF {
     }
 
     protected void handle_join_resp (JoinResp resp) {
-
+        //note
 	// The one who sent this message should be last in the path.
 
 	NeighborInfo my_root = (NeighborInfo) resp.path.getLast ();
@@ -1852,7 +1861,7 @@ implements SingleThreadedEventHandlerIF {
     //
     //////////////////////////////////////////////////////////////////////
 
-    protected Set<NeighborInfo> pings_in_flight = 
+    protected Set<NeighborInfo> pings_in_flight =
         new LinkedHashSet<NeighborInfo>();
 
     protected void send_ping (NeighborInfo ni) {
@@ -2020,7 +2029,7 @@ implements SingleThreadedEventHandlerIF {
     //  		  Routing table functions
     //
     //////////////////////////////////////////////////////////////////////
-
+    //note
     protected void add_to_rt (NeighborInfo ni) {
         if (! rt.contains (ni)) {
             if (have_rtt_ms (ni))
@@ -2143,7 +2152,7 @@ implements SingleThreadedEventHandlerIF {
     // 		          Node monitoring functions
     //
     //////////////////////////////////////////////////////////////////////
-
+    //note: build out to create checker
     protected boolean have_rtt_ms (NeighborInfo ni) {
 	return latency_map.containsKey (ni);
     }
@@ -2168,7 +2177,7 @@ implements SingleThreadedEventHandlerIF {
     // 		              Routing functions
     //
     //////////////////////////////////////////////////////////////////////
-
+    //note
     /**
      * Calculate the next hop using the standard algorithm.  If we're within
      * the range of the leaf set, returns the root.  Otherwise, if we can
@@ -2252,7 +2261,7 @@ implements SingleThreadedEventHandlerIF {
     public LinkedHashMap<NeighborInfo,Long> allNeighbors() {
         Set<NeighborInfo> n = leaf_set.as_set();
         n.addAll(rt.as_list());
-        LinkedHashMap<NeighborInfo,Long> m = 
+        LinkedHashMap<NeighborInfo,Long> m =
             new LinkedHashMap<NeighborInfo,Long>();
         for (NeighborInfo ni : n) {
             long lat = network.estimatedRTTMillis(ni.node_id);
@@ -2277,7 +2286,7 @@ implements SingleThreadedEventHandlerIF {
      * neighbor closest in network latency.  If my_neighbor_info is returned,
      * we're the root.
      */
-    public NeighborInfo calcNextHopPRS(BigInteger key, 
+    public NeighborInfo calcNextHopPRS(BigInteger key,
                                        Map<NeighborInfo,Long> allNeighbors) {
 
         NeighborInfo result = null;
@@ -2288,9 +2297,9 @@ implements SingleThreadedEventHandlerIF {
                 // This neighbor seems to be up.
 
                 BigInteger dist = calc_dist(ni.guid, key);
-                if ((dist.compareTo(current) < 0) 
-                    || ((dist.compareTo(current) == 0) 
-                        && in_range_mod (my_guid, ni.guid, key) 
+                if ((dist.compareTo(current) < 0)
+                    || ((dist.compareTo(current) == 0)
+                        && in_range_mod (my_guid, ni.guid, key)
                         && (!in_range_mod (ni.guid, my_guid, key)))) {
                     // And they make monotonic progress in the key space.
 
@@ -2304,7 +2313,7 @@ implements SingleThreadedEventHandlerIF {
                 }
             }
         }
-        if (result == null) 
+        if (result == null)
             result = my_neighbor_info;
         return result;
     }
@@ -2315,7 +2324,7 @@ implements SingleThreadedEventHandlerIF {
      * neighbor that makes the most progress / network latency.  If
      * my_neighbor_info is returned, we're the root.
      */
-    public NeighborInfo calcNextHopScaledPRS(BigInteger key, 
+    public NeighborInfo calcNextHopScaledPRS(BigInteger key,
             Function2<BigInteger,BigInteger,Long> scalingFunc) {
         return calcNextHopScaledPRS(key, scalingFunc, allNeighbors());
     }
@@ -2326,7 +2335,7 @@ implements SingleThreadedEventHandlerIF {
      * neighbor that makes the most progress / network latency.  If
      * my_neighbor_info is returned, we're the root.
      */
-    public NeighborInfo calcNextHopScaledPRS(BigInteger key, 
+    public NeighborInfo calcNextHopScaledPRS(BigInteger key,
             Function2<BigInteger,BigInteger,Long> scalingFunc,
             Map<NeighborInfo,Long> allNeighbors) {
 
@@ -2338,9 +2347,9 @@ implements SingleThreadedEventHandlerIF {
                 // This neighbor seems to be up.
 
                 BigInteger dist = current.subtract(calc_dist(ni.guid, key));
-                if ((dist.compareTo(BigInteger.ZERO) > 0) 
-                    || ((dist.compareTo(BigInteger.ZERO) == 0) 
-                        && in_range_mod (my_guid, ni.guid, key) 
+                if ((dist.compareTo(BigInteger.ZERO) > 0)
+                    || ((dist.compareTo(BigInteger.ZERO) == 0)
+                        && in_range_mod (my_guid, ni.guid, key)
                         && (!in_range_mod (ni.guid, my_guid, key)))) {
                     // And they make monotonic progress in the key space.
 
@@ -2354,7 +2363,7 @@ implements SingleThreadedEventHandlerIF {
                 }
             }
         }
-        if (result == null) 
+        if (result == null)
             result = my_neighbor_info;
         return result;
     }
@@ -2367,7 +2376,8 @@ implements SingleThreadedEventHandlerIF {
     /**
      * Calculates the next hop using greedy routing.
      */
-    public NeighborInfo calcNextHopGreedy(BigInteger key, 
+    //note!!
+    public NeighborInfo calcNextHopGreedy(BigInteger key,
                                           Map<NeighborInfo,Long> allNeighbors) {
         return calcNextHopScaledPRS(key, greedyScaling, allNeighbors);
     }
@@ -2435,16 +2445,17 @@ implements SingleThreadedEventHandlerIF {
                         NodeId closest_addr, Object user_data);
     }
 
-    protected Map<BigInteger,PendingLookupInfo> pending_lookups = 
+    protected Map<BigInteger,PendingLookupInfo> pending_lookups =
         new LinkedHashMap<BigInteger,PendingLookupInfo>();
 
     protected static class PendingLookupInfo {
-        public LinkedList<Pair<LookupCb,Object>> cbs = 
+        public LinkedList<Pair<LookupCb,Object>> cbs =
             new LinkedList<Pair<LookupCb,Object>>();
         public long last_start_time;
         public PendingLookupInfo (long l) { last_start_time = l; }
     }
 
+    //note
     public void lookup (BigInteger id, LookupCb cb, Object user_data) {
         PendingLookupInfo pl = pending_lookups.get(id);
         if (pl == null) {
@@ -2458,6 +2469,7 @@ implements SingleThreadedEventHandlerIF {
         pl.cbs.addLast (new Pair<LookupCb,Object>(cb, user_data));
     }
 
+    //note
     protected Thunk1<BigInteger> lookupTimeout = new Thunk1<BigInteger>() {
         public void run(BigInteger id) {
             PendingLookupInfo pl = pending_lookups.get(id);
@@ -2465,24 +2477,24 @@ implements SingleThreadedEventHandlerIF {
                 pl.last_start_time = now_ms ();
                 BambooRouteInit outb = new BambooRouteInit (
                         id, 0, false, false, new LookupReqPayload (my_node_id));
-                classifier.dispatch_later (outb, 0);
+                classifier.dispatch_later (outb, 0); //note: could add delays as in Chaumian mixes
                 acore.registerTimer(60*1000, curry(this, id));
             }
         }
     };
 
-    ///////////////////////////////////////////////////////////////////    
+    ///////////////////////////////////////////////////////////////////
     //
     //      Code to keep track of neighbors Vivaldi coordinates.
     //
-    ///////////////////////////////////////////////////////////////////    
+    ///////////////////////////////////////////////////////////////////
 
     public VirtualCoordinate coordinate(NeighborInfo ni) {
         Pair<VirtualCoordinate,Long> p = coords.get(ni);
         return (p == null) ? null : p.first;
     }
 
-    protected Map<NeighborInfo,Pair<VirtualCoordinate,Long>> coords = 
+    protected Map<NeighborInfo,Pair<VirtualCoordinate,Long>> coords =
         new LinkedHashMap<NeighborInfo,Pair<VirtualCoordinate,Long>>();
 
     protected static int COORD_CHECK = 60*1000;
@@ -2501,7 +2513,7 @@ implements SingleThreadedEventHandlerIF {
         }
     };
 
-    protected LinkedList<NeighborInfo> sendCoordsShuffle = 
+    protected LinkedList<NeighborInfo> sendCoordsShuffle =
         new LinkedList<NeighborInfo>();
 
     protected int send_coord_period = 1000;
@@ -2515,26 +2527,26 @@ implements SingleThreadedEventHandlerIF {
             }
             if (!sendCoordsShuffle.isEmpty()) {
                 NeighborInfo ni = sendCoordsShuffle.removeFirst();
-                CoordReq req = 
-                    new CoordReq(my_guid, vivaldi.localCoordinates()); 
-                rpc.sendRequest(ni.node_id, req, 5, CoordResp.class, 
+                CoordReq req =
+                    new CoordReq(my_guid, vivaldi.localCoordinates());
+                rpc.sendRequest(ni.node_id, req, 5, CoordResp.class,
                                 curry(coordRespHandler, ni), null);
             }
             acore.registerTimer(randomPeriod(send_coord_period), this);
         }
     };
 
-    protected Thunk2<NeighborInfo,CoordResp> coordRespHandler = 
+    protected Thunk2<NeighborInfo,CoordResp> coordRespHandler =
         new Thunk2<NeighborInfo,CoordResp>() {
         public void run(NeighborInfo ni, CoordResp resp) {
             coords.put(ni, Pair.create(resp.coords, new Long(timer_ms())));
         }
     };
 
-    protected Thunk3<InetSocketAddress,CoordReq,Object> coordReqHandler = 
+    protected Thunk3<InetSocketAddress,CoordReq,Object> coordReqHandler =
         new Thunk3<InetSocketAddress,CoordReq,Object>() {
         public void run(InetSocketAddress peer, CoordReq req, Object respTok) {
-            NeighborInfo other = 
+            NeighborInfo other =
                 new NeighborInfo(NodeId.create(peer), req.srcID);
             coords.put(other, Pair.create(req.srcCoords, new Long(timer_ms())));
             VirtualCoordinate local = vivaldi.localCoordinates();

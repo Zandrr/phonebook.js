@@ -5,6 +5,7 @@ Initial Restrictions
 - circuit statuses would disrupt forward secrecy (each circuit must be constructed from A to B without
 anyone in the middle reporting to either endpoint unless directly connected to that endpoint with no other
 nodes in between)
+- joining the network should be immediate, but consensus that a node is a ``good" node should only happen after the checker has hit the node several times to ensure nothing untoward is happening (e.g. you can join and send, but nothing can be routed through you until the checker approves)
 
 ----------
 
