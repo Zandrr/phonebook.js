@@ -22,6 +22,7 @@ import ostore.util.QuickSerializable;
  * @author  Sean C. Rhea
  * @version $Id: IterRouteReq.java,v 1.5 2003/10/05 18:22:11 srhea Exp $
  */
+//note
 public class IterRouteReq extends NetworkMessage {
 
     public BigInteger dest;
@@ -31,21 +32,21 @@ public class IterRouteReq extends NetworkMessage {
     public QuickSerializable payload;
 
     public IterRouteReq (IterRouteResp resp) {
-	super (resp.next_hop.node_id, false);  
-	src = resp.src; 
-	dest = resp.dest;  
-	app_id = resp.app_id;  
-	payload = resp.payload;  
+	super (resp.next_hop.node_id, false);
+	src = resp.src;
+	dest = resp.dest;
+	app_id = resp.app_id;
+	payload = resp.payload;
 	intermediate_upcall = resp.intermediate_upcall;
     }
 
-    public IterRouteReq (NodeId n, BigInteger s, BigInteger d, long a, 
+    public IterRouteReq (NodeId n, BigInteger s, BigInteger d, long a,
 	    boolean u, QuickSerializable p) {
-	super (n, false);  
-	src = s; 
-	dest = d;  
-	app_id = a;  
-	payload = p;  
+	super (n, false);
+	src = s;
+	dest = d;
+	app_id = a;
+	payload = p;
 	intermediate_upcall = u;
     }
 
@@ -79,9 +80,9 @@ public class IterRouteReq extends NetworkMessage {
 
     public String toString () {
 	return "(IterRouteReq " + super.toString() +
-	    " src=" + bamboo.util.GuidTools.guid_to_string(src) + 
-	    " dest=" + bamboo.util.GuidTools.guid_to_string(dest) + 
-	    " app_id=" + app_id + 
+	    " src=" + bamboo.util.GuidTools.guid_to_string(src) +
+	    " dest=" + bamboo.util.GuidTools.guid_to_string(dest) +
+	    " app_id=" + app_id +
 	    " intermediate_upcall=" + intermediate_upcall +
 	    " payload=" + payload + ")";
     }

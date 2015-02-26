@@ -21,6 +21,9 @@ import ostore.util.QSException;
  * @author  Sean C. Rhea
  * @version $Id: JoinReq.java,v 1.7 2005/03/02 03:25:45 srhea Exp $
  */
+//note: we'll need to update a proper join by making checker validation essential
+//to being able to pass data through a new node (e.g. a new node can only send once
+//the checker has decided it is safe)
 public class JoinReq extends NetworkMessage {
 
     public NodeId node_id;
@@ -38,7 +41,7 @@ public class JoinReq extends NetworkMessage {
 	guid = buffer.nextBigInteger ();
 	rev_ttl = buffer.nextInt ();
 	int path_len = buffer.nextInt ();
-	while (path_len-- > 0) 
+	while (path_len-- > 0)
 	    path.addLast (new NeighborInfo (buffer));
     }
 
@@ -48,7 +51,7 @@ public class JoinReq extends NetworkMessage {
         buffer.add (guid);
         buffer.add (rev_ttl);
 	buffer.add (path.size ());
-	for (Iterator i = path.iterator (); i.hasNext (); ) 
+	for (Iterator i = path.iterator (); i.hasNext (); )
 	    ((NeighborInfo) i.next ()).serialize (buffer);
     }
 
@@ -58,7 +61,7 @@ public class JoinReq extends NetworkMessage {
 	result.guid = guid;
 	result.rev_ttl = rev_ttl;
 	result.path = new LinkedList<NeighborInfo>();
-	for (Iterator i = path.iterator (); i.hasNext (); ) 
+	for (Iterator i = path.iterator (); i.hasNext (); )
 	    result.path.addLast ((NeighborInfo) i.next ());
 	return result;
     }
