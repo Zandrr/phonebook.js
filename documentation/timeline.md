@@ -37,6 +37,16 @@ Kelly
 --------
 "Checker" oracle
 
+Alex:
+  - Digital Ocean  
+  - OAUTH with Digital Ocean  
+  - Javascript versus Ruby versus...
+
+Kelly
+  - Bamboo on PlanetLab  
+  - Checker class in Bamboo leaf set construction  
+  - explore how leaf sets intersect and what that means for security  
+
 27 March
 --------
 how to set up a node
